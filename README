@@ -40,16 +40,29 @@ experiment with before implementing in your systems.
 EXAMPLES
 ---------------------
 require_once('class.geoengine.php');			
-$engine = geoengine::getInstance();				//geoengine is a factory singleton
-$ engine ->disambiguate("springfield"); 		// the most likely 'Springfield'
-$ engine ->getChildren(31278);					// children of Oxford, UK
-$ engine ->getElevationByWOEID(2461928);		// elevation of Northfield, MN
-$ engine ->getByName("springfield","UK"); 		// all Springfields in UK
-$ engine ->geocode("1 infinity loop, Cupertino, ca"); //geocodes
-$engine->reverseGeocode(0.151490,52.145329);	//reverse geocodes
-$engine->getBbox(727232)						// bounding box of Amsterdam
+$engine = geoengine::getInstance();             //geoengine is a factory singleton
+$engine ->disambiguate("springfield");          // the most likely 'Springfield'
+$engine ->getChildren(31278);                   // children of Oxford, UK
+$engine ->getElevationByWOEID(2461928);         // elevation of Northfield, MN
+$engine ->getByName("springfield","UK");        // all Springfields in UK
+$engine ->geocode("1 infinity loop, Cupertino, ca"); //geocodes
+$engine->reverseGeocode(0.151490,52.145329);    //reverse geocodes
+$engine->getBbox(727232);                       // bounding box of Amsterdam
 $engine->filterByType($engine->getDescendants(23424977),7) //all towns in US
-$engine->getAdjacencies(2468964);				//all towns surrounding Pasedena, CA
+$engine->getAdjacencies(2468964);               //all towns surrounding Pasedena, CA
+
+FILE OVERVIEW
+-------------------------
+class.geoengine.php         Core methods and factory class; instantiate as singleton
+class.webservice.php        Methods wrapping YQL calls; instantiated as singleton, when required, by geoengine
+class.geo.php				Geo object representing named-place; instantiated as required by geoengine
+import/class.import.php     Methods for tsv data import
+import/import.php           Procedural script for importing tsv data
+import/geo.sql              SQL script for creating database
+config.ini                  Configurations incl. database connection
+webservice/disambiguate.php Example script for getting most probably place of given name
+webservice/navigate.php     Example script for obtaining parents, children, etc. from geoplanet
+webservice/reversegeocode   Example script for reverse geocoding
 
 IMPORTING GEOPLANET DATA
 -------------------------
