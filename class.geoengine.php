@@ -42,18 +42,25 @@ class geoengine {
 	//======================== Methods =======================================	
 
 	/**
+	 * Singleton retreival
+	 * @return instance of self
+	 */
+	public static function getInstance() {
+		if (!(self :: $_instance instanceof self)) {
+			self :: $_instance = new self();
+		}
+		return self :: $_instance;
+	}
+
+	/**
 	* Gets places with corresponding placename (exact match) 
 	* Use only placenames ("Nortfield"), not contextual names ("Northfield, MN")
-	* @param string q 
-	* @param string iso iso code of country
+	* @param string q
 	* @return array of woeids
 	*/
-	public function getByName($q, $iso = false) {
+	public function getByName($q) {
 		$q = $this->escapeString($q);
-		$SQL = "SELECT woeid FROM " . self :: TABLEPLACES . " WHERE name=\"" . $q . "\"";
-		if ($iso) {
-			$SQL .= " AND country=" . $iso;
-		}
+		$SQL = "SELECT woeid FROM " . self :: TABLEPLACENAMES . " WHERE name=\"" . $q . "\"";
 		$result = $this->queryDB($SQL);
 		if (!$result) {
 			$this->logMsg(__METHOD__ . " error searching on placename " . $q);
@@ -89,56 +96,6 @@ class geoengine {
 			}
 			return $geo;
 		}
-	}
-
-	/**
-	* Caches woeid return for a placename/string query
-	* @param string q 
-	* @param int focus woeid focus
-	* @param int woeid resolved woeid
-	* @return array
-	*/
-	protected function writeDisambiguateCache($q, $woeid, $focus) {
-		$q = $this->escapeString($q);
-		$SQL = "INSERT LOW_PRIORITY INTO " . self :: TABLEDISAMBIGUATE . " (q,woeid,focus) VALUES ";
-		$SQL .= "(\"$q\",$woeid,$focus) ON DUPLICATE KEY UPDATE woeid=woeid"; //ignore in event dupe key is written
-		$result = $this->queryDB($SQL);
-		if (!$result) {
-			$this->logMsg(__METHOD__ . " error writing disambiguate cache " . $woeid);
-			return false;
-		}
-		return true;
-	}
-
-	/**
-	* Caches woeid return for a placename/string query
-	* @param string q 
-	* @param int focus woeid focus
-	* @return array
-	*/
-	protected function readDisambiguateCache($q, $focus) {
-		$SQL = "SELECT woeid FROM " . self :: TABLEDISAMBIGUATE . " WHERE q=\"" . $q . "\" AND focus=" . $focus;
-		$result = $this->queryDB($SQL);
-		if (!$result) {
-			$this->logMsg(__METHOD__ . " error reading disambiguate cache for place " . $q);
-			return false;
-		}
-		if ($result->num_rows == 1) {
-			$row = $result->fetch_array(MYSQLI_ASSOC);
-			return $row['woeid'];
-		} else {
-			return false;
-		}
-	}
-
-	/**
-	 * Singleton retreival
-	 */
-	public static function getInstance() {
-		if (!(self :: $_instance instanceof self)) {
-			self :: $_instance = new self();
-		}
-		return self :: $_instance;
 	}
 
 	/**
@@ -457,8 +414,10 @@ class geoengine {
 	* @return bool
 	*/
 	protected function applyConfig() {
-		if (file_exists(self :: CONFIGFILE)) {
-			$aConfigs = parse_ini_file(self :: CONFIGFILE);
+		$thisDir = dirname(__FILE__);
+		$configFile = $thisDir."/".self :: CONFIGFILE;		//config file assumed to be in same directory as this file
+		if (is_readable($configFile)) {
+			$aConfigs = parse_ini_file($configFile);
 			if (!empty ($aConfigs)) {
 				foreach ($aConfigs as $key => $value) {
 					$this-> $key = $value;
@@ -466,9 +425,13 @@ class geoengine {
 			}
 			return true;
 		} else {
-			$msg = "missing/unreadable config file (" . self :: CONFIGFILE . "); check file permissions";
+			if (is_file($configFile)){
+				$msg = "unreadable config file " . $configFile . "; check file permissions\n";	
+			} else {
+				$msg = "missing config file " . $configFile . "\n";	
+			}
 			echo $msg;
-			exit;
+			exit;		//can't log or operate without configs, so bail
 		}
 	}
 
@@ -515,6 +478,47 @@ class geoengine {
 		}
 
 		return $result;
+	}
+
+
+	/**
+	* Caches woeid return for a placename/string query
+	* @param string q 
+	* @param int focus woeid focus
+	* @param int woeid resolved woeid
+	* @return array
+	*/
+	protected function writeDisambiguateCache($q, $woeid, $focus) {
+		$q = $this->escapeString($q);
+		$SQL = "INSERT LOW_PRIORITY INTO " . self :: TABLEDISAMBIGUATE . " (q,woeid,focus) VALUES ";
+		$SQL .= "(\"$q\",$woeid,$focus) ON DUPLICATE KEY UPDATE woeid=woeid"; //ignore in event dupe key is written
+		$result = $this->queryDB($SQL);
+		if (!$result) {
+			$this->logMsg(__METHOD__ . " error writing disambiguate cache " . $woeid);
+			return false;
+		}
+		return true;
+	}
+
+	/**
+	* Caches woeid return for a placename/string query
+	* @param string q 
+	* @param int focus woeid focus
+	* @return array
+	*/
+	protected function readDisambiguateCache($q, $focus) {
+		$SQL = "SELECT woeid FROM " . self :: TABLEDISAMBIGUATE . " WHERE q=\"" . $q . "\" AND focus=" . $focus;
+		$result = $this->queryDB($SQL);
+		if (!$result) {
+			$this->logMsg(__METHOD__ . " error reading disambiguate cache for place " . $q);
+			return false;
+		}
+		if ($result->num_rows == 1) {
+			$row = $result->fetch_array(MYSQLI_ASSOC);
+			return $row['woeid'];
+		} else {
+			return false;
+		}
 	}
 
 	/**
