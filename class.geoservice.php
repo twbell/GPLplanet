@@ -5,8 +5,9 @@
  * geoservice - wraps geo web services. Use as standalone or more powerfully with gplplanet::geoengine
  * @package gplplanet
  * @author Tyler Bell tylerwbell[at]gmail[dot]com
- * @copyright 2009,2010 - Tyler Bell
- * @todo Authenticated YQL\
+ * @copyright (C) 2009,2010 - Tyler Bell
+ * @todo Authenticated YQL
+ * @license GNU General Public License
  */
 
 class geoservice {

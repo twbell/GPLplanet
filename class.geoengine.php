@@ -5,8 +5,9 @@
  * Run import.php file via cmdln to import geoplanet data in advance of use
  * @package gplplanet
  * @author Tyler Bell tylerwbell[at]gmail[dot]com
- * @copyright 2009,2010 - Tyler Bell
+ * @copyright (C) 2009,2010 - Tyler Bell
  * @todo support geoplanet belongTos()
+ * @license GNU General Public License
  */
 
 class geoengine {

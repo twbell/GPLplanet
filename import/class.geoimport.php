@@ -4,8 +4,9 @@
  * Methods for importing Yahoo GeoPlanet Data. Run import.php file via cmdln to import.
  * @package gplplanet
  * @author Tyler Bell tylerwbell[at]gmail[dot]com
- * @copyright 2009,2010 - Tyler Bell
- */
+ * @copyright (C) 2009,2010 - Tyler Bell
+ * @license GNU General Public License
+ */ 
 
 require_once ('../class.geoengine.php');
 class geoimport extends geoengine {

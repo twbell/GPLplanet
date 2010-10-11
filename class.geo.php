@@ -4,7 +4,8 @@
  * geo - Named place object, the instatiation of woeid
  * @package gplplanet
  * @author Tyler Bell tylerwbell[at]gmail[dot]com
- * @copyright 2009,2010 - Tyler Bell
+ * @copyright (C) 2009,2010 - Tyler Bell
+ * @license GNU General Public License
  */
 
 class geo {
