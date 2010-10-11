@@ -34,27 +34,28 @@ where required.  In a nutshell:
 - Gets and caches coordinates for woeids (not supplied with data dump)
 - Provides sample Web service scripts for deployment examples SaaS environments
 
-these libraries are intended to make GeoPlanet more accessible and easier to 
-experiment with before implementing in your systems.
+These libraries are intended to make a local instance of GeoPlanet more accessible and easier to 
+experiment with before implementing in production. If you are looking for a simple GeoPlanet
+Web service wrapper, see Tyler Hall's http://github.com/tylerhall/php-geoplanet/.
   
 EXAMPLES
 ---------------------
 require_once('class.geoengine.php');			
 $engine = geoengine::getInstance();             //geoengine is a factory singleton
-$engine ->disambiguate("springfield");          // the most likely 'Springfield'
-$engine ->getChildren(31278);                   // children of Oxford, UK
-$engine ->getElevationByWOEID(2461928);         // elevation of Northfield, MN
-$engine ->getByName("springfield","UK");        // all Springfields in UK
-$engine ->geocode("1 infinity loop, Cupertino, ca"); //geocodes
+$engine->disambiguate("springfield");           //the most likely 'Springfield'
+$engine->getChildren(31278);                    //children of woeid 31278 (Oxford, UK)
+$engine->getElevationByWOEID(2461928);          //elevation of woeid 2461928 (Northfield, MN)
+$engine->getByName("springfield","UK");         //all places called "Springfield" in UK
+$engine->geocode("1 infinity loop, Cupertino, ca"); //geocodes
 $engine->reverseGeocode(0.151490,52.145329);    //reverse geocodes
-$engine->getBbox(727232);                       // bounding box of Amsterdam
-$engine->filterByType($engine->getDescendants(23424977),7) //all towns in US
-$engine->getAdjacencies(2468964);               //all towns surrounding Pasedena, CA
+$engine->getBbox(727232);                       //bounding box of Amsterdam
+$engine->filterByType($engine->getDescendants(23424977),7); //all towns in US
+$engine->getAdjacencies(2468964);               //all towns surrounding woeid 2468964 (Pasedena, CA)
 
 FILE OVERVIEW
 -------------------------
 class.geoengine.php         Core methods and factory class; instantiate as singleton
-class.webservice.php        Methods wrapping YQL calls; instantiated as singleton, when required, by geoengine
+class.geoservice.php        Methods wrapping YQL calls; instantiated as singleton, when required, by geoengine
 class.geo.php               Geo object representing named-place; instantiated as required by geoengine
 import/class.import.php     Methods for tsv data import
 import/import.php           Procedural script for importing tsv data
