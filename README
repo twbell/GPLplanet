@@ -7,10 +7,25 @@
 
 INTRODUCTION
 -----------------------
-GPLplanet: an open source PHP library employing  local instances of Yahoo GeoPlanet(tm) in production. 
+GPLplanet: an open source PHP library employing  local instances of Yahoo 
+GeoPlanet(tm) in production. 
  
-"Yahoo! GeoPlanet is a resource for managing all geo-permanent named places on Earth. It provides the geographic developer community with the vocabulary and grammar to describe the world's geography in an unequivocal, permanent, and language-neutral manner. Developers can geo-enable their applications by using GeoPlanet to traverse the global spatial hierarchy, identify the geography relevant to their users and their businesses, and in turn, unambiguously geotag, geotarget, and geolocate data across the Web" http://developer.yahoo.com/geo/geoplanet/
-Yahoo makes GeoPlanet available as both a Web service and data download.  Due to call-per-day restrictions or latency concerns, small businesses and startups are either unwilling or unable to create their core geographic platforms on Yahoo Web services.   This library uses a local version of GeoPlanet to obtain similar functionality, in a local environment, allowing developers easy access to GeoPlanet in a PHP class with access to Web services where required.  In a nutshell:
+"Yahoo! GeoPlanet is a resource for managing all geo-permanent named places 
+on Earth. It provides the geographic developer community with the vocabulary 
+and grammar to describe the world's geography in an unequivocal, permanent, 
+\and language-neutral manner. Developers can geo-enable their applications 
+by using GeoPlanet to traverse the global spatial hierarchy, identify the 
+geography relevant to their users and their businesses, and in turn, 
+unambiguously geotag, geotarget, and geolocate data across the Web" 
+http://developer.yahoo.com/geo/geoplanet/
+
+Yahoo makes GeoPlanet available as both a Web service and data download.  
+Due to call-per-day restrictions or latency concerns, small businesses and 
+startups are either unwilling or unable to create their core geographic 
+platforms on Yahoo Web services.   This library uses a local version of 
+GeoPlanet to obtain similar functionality, in a local environment, allowing 
+developers easy access to GeoPlanet in a PHP class with access to Web services 
+where required.  In a nutshell:
 
 - Creates highly optimized (read: not normalized) MySQL geoplanet database
 - Imports GeoPlanet TSV
@@ -19,21 +34,22 @@ Yahoo makes GeoPlanet available as both a Web service and data download.  Due to
 - Gets and caches coordinates for woeids (not supplied with data dump)
 - Provides sample Web service scripts for deployment examples SaaS environments
 
-these libraries are intended to make GeoPlanet more accessible and easier to experiment with before implementing in your systems.
+these libraries are intended to make GeoPlanet more accessible and easier to 
+experiment with before implementing in your systems.
   
 EXAMPLES
 ---------------------
-require_once('class.geoengine.php');
-$engine = geoengine::getInstance();
-$ engine ->disambiguate("springfield"); 	// the most likely 'Springfield'
-$ engine ->getChildren(31278);				// children of Oxford, UK
-$ engine ->getElevationByWOEID(2461928);	// elevation of Northfield, MN
-$ engine ->getByName("springfield","UK"); 	// all Springfields in UK
+require_once('class.geoengine.php');			
+$engine = geoengine::getInstance();				//geoengine is a factory singleton
+$ engine ->disambiguate("springfield"); 		// the most likely 'Springfield'
+$ engine ->getChildren(31278);					// children of Oxford, UK
+$ engine ->getElevationByWOEID(2461928);		// elevation of Northfield, MN
+$ engine ->getByName("springfield","UK"); 		// all Springfields in UK
 $ engine ->geocode("1 infinity loop, Cupertino, ca"); //geocodes
 $engine->reverseGeocode(0.151490,52.145329);	//reverse geocodes
-$engine->getBbox(727232)					// bounding box of Amsterdam
+$engine->getBbox(727232)						// bounding box of Amsterdam
 $engine->filterByType($engine->getDescendants(23424977),7) //all towns in US
-$engine->getAdjacencies(2468964);			//all towns surrounding Pasedena, CA
+$engine->getAdjacencies(2468964);				//all towns surrounding Pasedena, CA
 
 IMPORTING GEOPLANET DATA
 -------------------------
