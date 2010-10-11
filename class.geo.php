@@ -1,12 +1,13 @@
 <?php
 
+
 /**
- * geo - Named place object, the instatiation of woeid
- * @package gplplanet
- * @author Tyler Bell tylerwbell[at]gmail[dot]com
- * @copyright (C) 2009,2010 - Tyler Bell
- * @license GNU General Public License
- */
+* geo - Named place object, the instatiation of woeid
+* @package gplplanet
+* @author Tyler Bell tylerwbell[at]gmail[dot]com
+* @copyright 2009,2010 - Tyler Bell
+* @license GNU General Public License
+*/
 
 class geo {
 
@@ -29,7 +30,7 @@ class geo {
 	private $consistOf;
 	private $adjacencies;
 
-	//=================================== 	
+	//===================================
 	/**
 	* Constructor
 	* @param array row assoc. array from places table
@@ -52,7 +53,7 @@ class geo {
 	}
 
 	/** Get Bounding Box
-	 * @return array
+	* @return array
 	*/
 	public function getBbox() {
 		if (isset ($this->bBox['sw_lon'])) {
@@ -68,8 +69,8 @@ class geo {
 	}
 
 	/** Get coordinates of centroid
-	 * @return array
-	 */
+	* @return array
+	*/
 	public function getCentroid() {
 		if (isset ($this->centroid['lon'])) {
 			return $this->centroid;
@@ -84,9 +85,9 @@ class geo {
 	}
 
 	/**
-	 * Updates coordinates of this instance with coordinates from another geo object
-	 * @return bool
-	 */
+	* Updates coordinates of this instance with coordinates from another geo object
+	* @return bool
+	*/
 	protected function updateInstanceCoords($geo) {
 		$centroid = $geo->getCentroid();
 		$bBox = $geo->getBbox();
@@ -102,24 +103,24 @@ class geo {
 	}
 
 	/** Get woeid
-	 * @return int woeid
-	 */
+	* @return int woeid
+	*/
 	public function getWoeid() {
 		return $this->woeid;
 	}
 
 	/** Get placename
-	 * @return string placename
-	 */
+	* @return string placename
+	*/
 	public function getName() {
 		return $this->name;
 	}
 
 	/** Get placename with geographic context or qualifier
-	 * Falls back to normal name if not context name available
-	 * @param Bool nameType	return string label of place type
-	 * @return string
-	 */
+	* Falls back to normal name if not context name available
+	* @param Bool nameType return string label of place type
+	* @return string
+	*/
 	public function getContextName() {
 		if ($this->contextName) {
 			return $this->contextName;
@@ -128,10 +129,10 @@ class geo {
 		}
 	}
 
-	/** Get  type of this place
-	 * @param Bool nameType	return string label instead of place code
-	 * @return mixed interger or string placetype as requested
-	 */
+	/** Get type of this place
+	* @param Bool nameType return string label instead of place code
+	* @return mixed interger or string placetype as requested
+	*/
 	public function getPlaceType($nameType = false) {
 		if ($nameType) {
 			return $this->placeTypeName;
@@ -141,8 +142,8 @@ class geo {
 	}
 
 	/** Get children of this place
-	 * @return array Array of woeids
-	 */
+	* @return array Array of woeids
+	*/
 	public function getChildren() {
 		if ($this->children) {
 			return $this->children;
@@ -153,9 +154,9 @@ class geo {
 	}
 
 	/**
-	 * Gets geo engine singleton
-	 * @return obj geo engine object
-	 */
+	* Gets geo engine singleton
+	* @return obj geo engine object
+	*/
 	public function getEngine() {
 		if (!class_exists("geoengine")) {
 			require_once ('class.geoengine.php');
@@ -164,8 +165,8 @@ class geo {
 	}
 
 	/** Get siblings of this place (places with same parent of same type)
-	 * @return array Array of woeids
-	 */
+	* @return array Array of woeids
+	*/
 	public function getSiblings() {
 		if ($this->siblings) {
 			return $this->siblings;
@@ -175,8 +176,8 @@ class geo {
 	}
 
 	/** Get adjacencies (neighbors) of this place
-	 * @return array Array of woeids
-	 */
+	* @return array Array of woeids
+	*/
 	public function getAdjacencies() {
 		if ($this->adjacencies) {
 			return $this->adjacencies;
@@ -186,8 +187,8 @@ class geo {
 	}
 
 	/** Get alternative names for this place
-	 * @return array Array of placenames
-	 */
+	* @return array Array of placenames
+	*/
 	public function getAliases() {
 		if ($this->aliases) {
 			return $this->aliases;
