@@ -114,7 +114,6 @@ CREATE TABLE `geo_places` (
   `bbox_ne_lon` double DEFAULT NULL,
   `country` varchar(3) COLLATE utf8_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`woeid`),
-  KEY `name_idx`(`name`),
   KEY `country_idx`(`country`),
   KEY `placetype_idx` (`placetype`),
   KEY `centroid_lat_idx` (`centroid_lat`),
