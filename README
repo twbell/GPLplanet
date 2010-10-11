@@ -55,7 +55,7 @@ FILE OVERVIEW
 -------------------------
 class.geoengine.php         Core methods and factory class; instantiate as singleton
 class.webservice.php        Methods wrapping YQL calls; instantiated as singleton, when required, by geoengine
-class.geo.php				Geo object representing named-place; instantiated as required by geoengine
+class.geo.php               Geo object representing named-place; instantiated as required by geoengine
 import/class.import.php     Methods for tsv data import
 import/import.php           Procedural script for importing tsv data
 import/geo.sql              SQL script for creating database
