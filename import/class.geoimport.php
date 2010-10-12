@@ -17,7 +17,6 @@ class geoimport extends geoengine {
 	const RAWADJACENCIES = "raw_adjacencies";
 	const TEMPTABLEDESC = "temp_descendants";
 
-
 	//=============== METHODS ==================
 
 	/**

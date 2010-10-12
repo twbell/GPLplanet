@@ -27,7 +27,7 @@ error_reporting(E_ERROR);
 //==================== Usually no need to edit below this line =================
 set_time_limit(0);		
 require_once ('class.geoimport.php');
-$importEngine = new geoimport;													
+$importEngine = new geoimport;												
 echo "Importing Yahoo Geoplanet Data\n";
 /*
 if (!$importEngine->importAdjacencies($adjacenciesFile)){exit;}
@@ -38,9 +38,9 @@ if (!$importEngine->populatePlaceNames()){exit;}
 if (!$importEngine->populateAdjacencies()){exit;}
 if (!$importEngine->populateParents()){exit;}
 if (!$importEngine->populateChildren()){exit;}
-*/
 if (!$importEngine->populateAncestors()){exit;}
+*/
 
-//if (!$importEngine->populateDescendants()){exit;}
+if (!$importEngine->populateDescendants()){exit;}
 
 echo "Import complete\n";

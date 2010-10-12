@@ -17,11 +17,11 @@ class geoengine {
 	public $logFile = ''; //set by config file; set to null in config if logging not required
 
 	//database connection, vars imported at runtime from config file
-	private $dbHost;
-	private $dbUser;
-	private $dbPassword;
-	private $dbName;
-	private $db; //db object created and retained on connection
+	protected $dbHost;
+	protected $dbUser;
+	protected $dbPassword;
+	protected $dbName;
+	protected $db; //db object created and retained on connection
 
 	//table names
 	const TABLEPLACES = "geo_places";
@@ -36,7 +36,7 @@ class geoengine {
 	const TABLEDISAMBIGUATE = "cache_disambiguate";
 
 	//misc
-	private static $_instance; //singleton management
+	protected static $_instance; //singleton management
 	public $defaultFocus = 1; //woeid of default focus geography
 
 	//======================== Methods =======================================	
