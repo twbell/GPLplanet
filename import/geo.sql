@@ -85,7 +85,7 @@ CREATE TABLE `geo_parents` (
 --
 -- Create table `geo_placenames`
 --
-CREATE TABLE  `geo`.`geo_placenames` (
+CREATE TABLE  `geo_placenames` (
   `woeid` int(10) unsigned NOT NULL,
   `pref` tinyint(1) NOT NULL DEFAULT '0',
   `name` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
