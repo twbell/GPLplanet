@@ -97,7 +97,7 @@ CREATE TABLE  `geo`.`geo_placenames` (
   KEY `nametype_idx` (`nametype`),
   KEY `placetype_idx` (`placetype`),
   KEY `pref_idx` (`pref`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci  COMMENT='All placenames';
 --
 -- Create table `geo_places`
 --
