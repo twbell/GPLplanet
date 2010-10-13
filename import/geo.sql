@@ -85,20 +85,19 @@ CREATE TABLE `geo_parents` (
 --
 -- Create table `geo_placenames`
 --
-CREATE TABLE `geo_placenames` (
+CREATE TABLE  `geo`.`geo_placenames` (
   `woeid` int(10) unsigned NOT NULL,
   `pref` tinyint(1) NOT NULL DEFAULT '0',
   `name` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
   `nametype` varchar(1) COLLATE utf8_unicode_ci DEFAULT NULL,
   `placetype` tinyint(3) NOT NULL,
-  
+  `lang` varchar(3) COLLATE utf8_unicode_ci NOT NULL,
   KEY `woeid_idx` (`woeid`),
   KEY `name_idx` (`name`),
   KEY `nametype_idx` (`nametype`),
   KEY `placetype_idx` (`placetype`),
   KEY `pref_idx` (`pref`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci
 --
 -- Create table `geo_places`
 --
