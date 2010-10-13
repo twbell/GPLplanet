@@ -68,7 +68,7 @@ CREATE TABLE `geo_consistof` (
 --
 CREATE TABLE `geo_descendants` (
   `woeid` int(10) unsigned NOT NULL,
-  `descendants` mediumtext COLLATE utf8_unicode_ci NOT NULL,
+  `descendants` longtext COLLATE utf8_unicode_ci NOT NULL,
   PRIMARY KEY (`woeid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci COMMENT='Descendants lookup';
 
