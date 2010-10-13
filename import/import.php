@@ -30,7 +30,6 @@ require_once ('class.geoimport.php');
 $importEngine = new geoimport;												
 echo "Importing Yahoo Geoplanet Data\n";
 
-/*
 if (!$importEngine->importAdjacencies($adjacenciesFile)){exit;}
 if (!$importEngine->importPlaces($placesFile)){exit;}
 if (!$importEngine->importAliases($aliasFile)){exit;}
@@ -39,7 +38,7 @@ if (!$importEngine->populatePlaceNames()){exit;}
 if (!$importEngine->populateAdjacencies()){exit;}
 if (!$importEngine->populateParents()){exit;}
 if (!$importEngine->populateChildren()){exit;}
-if (!$importEngine->populateAncestors()){exit;}*/
+if (!$importEngine->populateAncestors()){exit;}
 
 if (!$importEngine->populateDescendants()){exit;}
 echo "Import complete\n";
