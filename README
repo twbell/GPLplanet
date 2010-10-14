@@ -67,16 +67,16 @@ webservice/reversegeocode   Example script for reverse geocoding
 
 IMPORTING GEOPLANET DATA
 -------------------------
-(1) Use geo.sql to create database
+(1) Add database vars to config.ini
 (2) Download geoplanet data from http://developer.yahoo.com/geo/geoplanet/data/
 (3) Add file names to the file variables in import.php
-(4) Run import.php from the command line (i.e. "php import.php"
+(4) Run import.php from the command line (e.g. "php import.php")
 
 Import Notes:
 - Import status will be echoed
-- Script takes several hours or days, depending on processor
-- 50GB HD space required for MySQL temporary tables
+- Script takes several hours or even days, depending on processor
+- 50GB HD space required for MySQL temporary tables during import process
 - php.ini memory_limit +1GB
-- MySQL max_allowed_packet required +1GB
-
+- MySQL max_allowed_packet required 20MB
+- Largest array produced thereafter at runtime is just under 18MB (UK descendants)
 
