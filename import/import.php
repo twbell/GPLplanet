@@ -23,7 +23,8 @@ $file['adjacencies'] = "/tmp/geoplanet_adjacencies_7.5.2.tsv";
 set_time_limit(0);		  //takes a while
 error_reporting(E_ERROR); //runtime error reporting
 require_once ('class.geoimport.php');
-$importEngine = new geoimport;												
+$importEngine = new geoimport;			
+								
 //check files
 foreach ($files as $file){
 	if (!file_exists($file)){
@@ -31,6 +32,7 @@ foreach ($files as $file){
 		exit;
 	}
 }
+echo "Files Verified\n";
 //create database
 echo "Creating Data Structure\n";
 if (!$importEngine->createDatabase()){exit;}
@@ -42,6 +44,7 @@ if (!$importEngine->importPlaces($file['places'])){exit;}
 if (!$importEngine->importAliases($files['aliases'])){exit;}
 //optimize data
 if (!$importEngine->populatePlaces()){exit;}
+if (!$importEngine->addPlaceTypeCodes()){exit;}
 if (!$importEngine->populatePlaceNames()){exit;}
 if (!$importEngine->populateAdjacencies()){exit;}
 if (!$importEngine->populateParents()){exit;}
