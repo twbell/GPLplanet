@@ -7,7 +7,7 @@
 
 INTRODUCTION
 -----------------------
-GPLplanet: an open source PHP library employing  local instances of Yahoo 
+GPLplanet: an open source PHP library to assist in employing local instances of Yahoo 
 GeoPlanet(tm) in production. 
  
 "Yahoo! GeoPlanet is a resource for managing all geo-permanent named places 
@@ -35,8 +35,8 @@ where required.  In a nutshell:
 - Provides sample Web service scripts for deployment examples SaaS environments
 
 These libraries are intended to make a local instance of GeoPlanet more accessible and easier to 
-experiment with before implementing in production. If you are looking for a simple GeoPlanet
-Web service wrapper, see Tyler Hall's http://github.com/tylerhall/php-geoplanet/.
+understand before implementing in production. If you are looking for a simple GeoPlanet
+Web-service-only wrapper, see Tyler Hall's http://github.com/tylerhall/php-geoplanet/.
   
 EXAMPLES
 ---------------------
@@ -69,7 +69,7 @@ IMPORTING GEOPLANET DATA
 -------------------------
 (1) Add database vars to config.ini
 (2) Download geoplanet data from http://developer.yahoo.com/geo/geoplanet/data/
-(3) Add file names to the file variables in import.php
+(3) Assign tsv filenames to the variables in import.php
 (4) Run import.php from the command line (e.g. "php import.php")
 
 Import Notes:
