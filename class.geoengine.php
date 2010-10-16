@@ -98,6 +98,43 @@ class geoengine {
 		}
 	}
 
+	/** Gets type of a place
+	 * @param int woeid woeid
+	 * @param Bool stringName set to True if you want the string equiv.
+	 * @return int|string placetype code (default) or placetype name
+	 */
+	public function getPlaceType($woeid, $stringName = false) {
+		if ($stringName) {
+			$select = "placetypename";
+		} else {
+			$select = "placetype";
+		}
+		$SQL = "SELECT " . $select . " FROM " . $this->tPlaces . " WHERE woeid=" . $woeid;
+		$result = $this->queryDB($SQL);
+		if (!$result) {
+			$this->logMsg(__METHOD__ . " Error");
+			return false;
+		}
+		$row = $result->fetch_array(MYSQLI_ASSOC);
+		return $row[$select];
+	}
+
+	/** Gets Placetype string (name) from placetype code
+	 * @param int placeTypeCode
+	 * @return string
+	 */
+	public function placeTypeLookup($placeTypeCode){
+		$SQL = "SELECT name FROM " . self::TABLEPLACETYPES . " WHERE id=" . $placeTypeCode;
+		$result = $this->queryDB($SQL);
+		if (!$result) {
+			$this->logMsg(__METHOD__ . " Error");
+			return false;
+		}
+		if ($result->num_rows === 0){return false;}
+		$row = $result->fetch_array(MYSQLI_ASSOC);
+		return $row['name'];
+	}
+
 	/**
 	 * Gets elevation from woeid
 	 * @param int woeid
