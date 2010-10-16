@@ -98,18 +98,48 @@ class geoimport extends geoengine {
 	* @return Bool
 	*/
 	public function populateDescendants() {
-		echo "Populating descendants... ";
-		$SQL1 = "SELECT woeid FROM ".self::TABLEPLACES;
-		$SQL1 .= " WHERE placetype NOT IN (19,29) AND woeid != 0";						//filter by type and do not need earth
-		$SQL1 .= " AND woeid IN (SELECT parent from ".self::RAWPLACES.")";				//parents only
-		$SQL1 .= " AND woeid NOT IN (SELECT woeid FROM ".self::TABLEDESCENDANTS.")";    //as-yet unprocessed
-		$result1 = $this->queryDB($SQL1);
-		echo $result1->num_rows." unprocessed; processing... ";
-		while ($row1 = $result1->fetch_array(MYSQLI_ASSOC)) {
-			$this->getDescendants($row1['woeid']);										//this calculates _and_ writes to table 	
+		echo "Populating descendants... \n";
+		//iterate by placetype, smallest first, to optimize memory use.
+		$placeTypeOrder = array(20,6,11,15,16,17,22,32,33,3,37,38,14,13,7,35,10,24,25,9,27,8,26,12,19,31,18,21,29,36);
+		foreach ($placeTypeOrder as $placeType){	
+			$SQL1 = "SELECT woeid FROM ".self::TABLEPLACES;
+			$SQL1 .= " WHERE placetype =".$placeType." AND woeid != 1";						//filter by type and do not need earth
+			$SQL1 .= " AND woeid IN (SELECT parent from ".self::RAWPLACES.")";	//parents only
+			$SQL1 .= " AND woeid NOT IN (SELECT woeid FROM ".self::TABLEDESCENDANTS.")";    //as-yet unprocessed
+			$result1 = $this->queryDB($SQL1);
+			$rowCount = $result1->num_rows;
+			if ($rowCount > 0){
+				echo "\t".$rowCount." ".$this->placeTypeLookup($placeType)."s unprocessed; processing... \n";
+				while ($row1 = $result1->fetch_array(MYSQLI_ASSOC)) {
+					$this->getDescendants($row1['woeid']);										//this calculates _and_ writes to table 	
+				}
+			}
 		}
-		echo " complete\n";
+		echo "complete\n";
 		return true;
+	}
+
+	/**
+	* Adds numeric placetype codes to places table
+	* @return Bool
+	*/
+	public function addPlaceTypeCodes() {
+		echo "Adding placetype codes to places...";
+		$SQL = "UPDATE " . self::TABLEPLACES . "," . self::TABLEPLACETYPES;
+		$SQL .= " SET " . self::TABLEPLACES . ".placetype=" . self::TABLEPLACETYPES . ".id";
+		$SQL .= " WHERE " . self::TABLEPLACES . ".placetypename=" . self::TABLEPLACETYPES . ".shortname";
+		$SQL .= " AND ". self::TABLEPLACES .".placetype IS NULL";  //gets only those not yet updated
+		$result = $this->queryDB($SQL);
+		if (!$result) {
+			$this->logMsg(__METHOD__."error updating placetype codes");
+			return false;
+		}	
+		//remove index on string placetype; no longer needed after this operation
+		echo " Dropping string index...";
+		$SQL1 = "ALTER TABLE `". self::TABLEPLACES . "` DROP INDEX `placetypename_idx`";
+		$result1 = $this->queryDB($SQL1);
+		echo " complete\n";
+		return true;			
 	}
 
 	/**
