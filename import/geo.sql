@@ -99,11 +99,10 @@ CREATE TABLE IF NOT EXISTS  `geo_placenames` (
 --
 -- Create table `geo_places`
 --
-CREATE TABLE IF NOT EXISTS `geo_places` (
+CREATE TABLE IF NOT EXISTS  `geo`.`geo_places` (
   `woeid` int(10) unsigned NOT NULL,
   `name` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
-  `contextname` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
-  `placetypename` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+  `placetypename` varchar(25) COLLATE utf8_unicode_ci NOT NULL,
   `placetype` tinyint(3) unsigned DEFAULT NULL,
   `centroid_lat` double DEFAULT NULL,
   `centroid_lon` double DEFAULT NULL,
@@ -113,16 +112,16 @@ CREATE TABLE IF NOT EXISTS `geo_places` (
   `bbox_ne_lon` double DEFAULT NULL,
   `country` varchar(3) COLLATE utf8_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`woeid`),
-  KEY `country_idx`(`country`),
-  KEY `placetype_idx` (`placetype`),
+  KEY `placetype_idx` (`placetype`) USING BTREE,
   KEY `centroid_lat_idx` (`centroid_lat`),
   KEY `centroid_lon_idx` (`centroid_lon`),
   KEY `bbox_sw_lat_idx` (`bbox_sw_lat`),
   KEY `bbox_sw_lon_idx` (`bbox_sw_lon`),
   KEY `bbox_ne_lat_idx` (`bbox_ne_lat`),
-  KEY `bbox_ne_lon_idx` (`bbox_ne_lon`)
-  
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci  COMMENT='Main places table';
+  KEY `bbox_ne_lon_idx` (`bbox_ne_lon`),
+  KEY `country_idx` (`country`),
+  KEY `placetypename_idx` (`placetypename`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci COMMENT='Main places table';
 
 --
 -- Create table `geo_placetypes`
