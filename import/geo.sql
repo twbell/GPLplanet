@@ -99,7 +99,7 @@ CREATE TABLE IF NOT EXISTS  `geo_placenames` (
 --
 -- Create table `geo_places`
 --
-CREATE TABLE IF NOT EXISTS  `geo`.`geo_places` (
+CREATE TABLE IF NOT EXISTS  `geo_places` (
   `woeid` int(10) unsigned NOT NULL,
   `name` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
   `placetypename` varchar(25) COLLATE utf8_unicode_ci NOT NULL,
