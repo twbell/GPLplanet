@@ -255,15 +255,20 @@ class geoimport extends geoengine {
 	* @param string name table name being populated
 	* @return Bool
 	*/	
-	protected function createTrackerTable($name){;		
+	public function createTrackerTable($name){;		
 		$SQL = "CREATE TABLE IF NOT EXISTS `".$this->dbName."`.`temp_".$name."` (
-				  `woeid` INT UNSIGNED NOT NULL,
+				  `id` INT UNSIGNED NOT NULL,
 				  `timestamp` TIMESTAMP,
-				  PRIMARY KEY (`woeid`)
+				  PRIMARY KEY (`id`)
 				)
 				ENGINE = MyISAM
-				COMMENT = 'Temporary Table for tracking progress population'";
-		$result = $this->queryDB($SQL);			
+				COMMENT = 'Temporary Table for tracking interruptable progress'";
+		$result = $this->queryDB($SQL);		
+		if (!$result){
+			return false;
+		} else {
+			return true;
+		}
 	}
 
 
@@ -272,23 +277,69 @@ class geoimport extends geoengine {
 	* @param string $name Table Name
 	* @return Bool
 	*/	
-	protected function dropTrackerTable($name){
-		$SQL = "DROP TABLE IF EXISTS tracker_".$name;
+	public function dropTrackerTable($name){
+		$SQL = "DROP TABLE IF EXISTS temp_".$name;
 		$result = $this->queryDB($SQL);
-		return true;
+		if (!$result){
+			return false;
+		} else {
+			return true;
+		}
 	}
 
 	/**
-	* Adds woeid into tracker table
-	* @param int woeid
+	* Adds id into tracker table
+	* @param int id
 	* @param string name Name of tracker table
 	* @return Bool
 	*/	
-	protected function addTracker($woeid,$name){
-		$SQL = "INSERT INTO tracker_".$name." (woeid) VALUES (".$woeid.")";
+	public function addTracker($id,$name){
+		$SQL = "INSERT INTO temp_".$name." (id) VALUES (".$id.")";
 		$result = $this->queryDB($SQL);
-		return true;
+		if (!$result){
+			return false;
+		} else {
+			return true;
+		}
 	}
+	
+	/**
+	* Returns largest id currently in tracker table  (0 if no previous entries)
+	* @param string name Name of tracker table
+	* @return Bool
+	*/	
+	public function getMaxTracker($name){
+		$SQL = "SELECT MAX(id) AS res FROM temp_".$name;
+		$result = $this->queryDB($SQL);
+		if (!$result){
+			return false;
+		} else {
+			if ($result->num_rows === 0){
+				return 0;
+			}
+			$row = $result->fetch_array(MYSQLI_ASSOC);
+			return $row['res'];
+		}
+	}	
+	
+	/**
+	* Returns last id inserted into tracker table (0 if no previous entries)
+	* @param string name Name of tracker table
+	* @return Bool
+	*/	
+	public function getLastTracker($name){
+		$SQL = "SELECT id AS res FROM temp_".$name." ORDER BY timestamp DESC LIMIT 0,1";
+		$result = $this->queryDB($SQL);
+		if (!$result){
+			return false;
+		} else {
+		if ($result->num_rows === 0){
+			return 0;
+		}
+			$row = $result->fetch_array(MYSQLI_ASSOC);
+			return $row['res'];
+		}
+	}		
 	
 	/**Create database and tables from external script
 	 * @return bool
@@ -369,7 +420,7 @@ class geoimport extends geoengine {
 	public function tableExists($tableName){
 		$SQL = "DESC ".$tableName;
 		$result = $this->queryDB($SQL);
-		if (mysql_errno()==1146){
+		if ($this->db->errno==1146){
 			$SQL2 = "SHOW TABLES";
 			$result2 = $this->queryDB($SQL2);
 			$logMsg = "Found the following tables:\n";
@@ -471,7 +522,7 @@ class geoimport extends geoengine {
 		$this->disableKeys(self :: TABLEPLACENAMES);											
 		$SQL = "INSERT INTO " . self::TABLEPLACENAMES . "(woeid,pref,name,nametype)
 				SELECT woeid, 1, name, NULL
-				FROM " . self :: TABLEPLACES;
+				FROM " . self :: TABLEPLACES. " WHERE woeid NOT IN (SELECT DISTINCT woeid FROM ".self::TABLEPLACENAMES." WHERE pref=1)";
 		if ($this->queryDB($SQL)) {
 			$this->enableKeys(self :: TABLEPLACENAMES);											
 			echo " complete\n";
@@ -491,7 +542,7 @@ class geoimport extends geoengine {
 		$SQL = "INSERT INTO " . self::TABLEPLACENAMES . "(woeid,pref,name,nametype,lang)
 			SELECT " . self :: RAWALIASES . ".woeid, 0, " . self :: RAWALIASES . ".name, " . self :: RAWALIASES . ".nametype,". self :: RAWALIASES . ".lang
 			FROM " . self :: RAWALIASES . "," . self :: TABLEPLACES . "
-			WHERE " . self :: RAWALIASES . ".woeid=" . self :: TABLEPLACES . ".woeid";
+			WHERE " . self :: RAWALIASES . ".woeid=" . self :: TABLEPLACES . ".woeid AND " . self :: RAWALIASES . ".woeid NOT IN (SELECT DISTINCT woeid FROM ".self::TABLEPLACENAMES." WHERE pref=0)";
 		if ($this->queryDB($SQL)) {
 			$this->enableKeys(self :: TABLEPLACENAMES);											
 			echo " complete\n";

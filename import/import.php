@@ -11,18 +11,21 @@
  * @copyright (C) 2009,2010 - Tyler Bell
  * @license GNU General Public License
  * Ensure php.ini memory_limit is set to 1GB for handling large arrays
- * Temp tables require 50 GB
+ * Temp tables require 50 GB HDD space
  */
 
 //Full path to raw geoplanet files (change to suit your own path)
 $files['aliases'] = "/tmp/geoplanet_aliases_7.5.2.tsv";
 $files['places'] = "/tmp/geoplanet_places_7.5.2.tsv";
 $files['adjacencies'] = "/tmp/geoplanet_adjacencies_7.5.2.tsv";
+
+
 //==================== Usually no need to edit below this line =================
 set_time_limit(0);		  //no timeout
 error_reporting(E_ERROR); //runtime error reporting
 require_once ('class.geoimport.php');
-$importEngine = new geoimport;									
+$importEngine = new geoimport;
+$importProgress = "import";		//table name for tracking import progress					
 //check files
 foreach ($files as $file){
 	if (!is_readable($file)){
@@ -34,19 +37,104 @@ echo "Files Verified\n";
 //create database
 echo "Creating Data Structure\n";
 if (!$importEngine->createDatabase()){exit;}
+//create table to track import progress (if not exist)
+if (!$importEngine->createTrackerTable($importProgress)){exit;}
+//get last stage of import completed
+$lastStage = $importEngine->getMaxTracker($importProgress);
 //import files
 echo "Importing Yahoo Geoplanet Data\n";
-if (!$importEngine->populatePlaceTypes()){exit;}
-if (!$importEngine->importAdjacencies($files['adjacencies'])){exit;}
-if (!$importEngine->importPlaces($files['places'])){exit;}
-if (!$importEngine->importAliases($files['aliases'])){exit;}
-//optimize data
-if (!$importEngine->populatePlaces()){exit;}
-if (!$importEngine->addPlaceTypeCodes()){exit;}
-if (!$importEngine->populatePlaceNames()){exit;}
-if (!$importEngine->populateAdjacencies()){exit;}
-if (!$importEngine->populateParents()){exit;}
-if (!$importEngine->populateChildren()){exit;}
-if (!$importEngine->populateAncestors()){exit;}
-if (!$importEngine->populateDescendants()){exit;}
-echo "Import complete\n";
+
+//Switch statement ensures script picks up where it left off and does not attempt re-inserts, etc.
+switch ($lastStage) {
+	//populate placetypes 1
+    case 0:
+		if (!$importEngine->populatePlaceTypes()){
+			exit;
+		} else {
+			$importEngine->addTracker(1,$importProgress);
+		}
+	//import adjacencies 2
+	case 1:
+		if (!$importEngine->importAdjacencies($files['adjacencies'])){
+			exit;
+		} else {
+			$importEngine->addTracker(2,$importProgress);
+		}
+	//import places 3
+	case 2:
+		if (!$importEngine->importPlaces($files['places'])){
+			exit;
+		} else {
+			$importEngine->addTracker(3,$importProgress);
+		}
+	//import aliases 4
+	case 3:
+		if (!$importEngine->importAliases($files['aliases'])){
+			exit;
+		} else {
+			$importEngine->addTracker(4,$importProgress);
+		}	
+	//populate places 5
+	case 4:
+		if (!$importEngine->populatePlaces()){
+			exit;
+		} else {
+			$importEngine->addTracker(5,$importProgress);
+		}		
+	//populate place type codes 6
+	case 5:
+		if (!$importEngine->addPlaceTypeCodes()){
+			exit;
+		} else {
+			$importEngine->addTracker(6,$importProgress);
+		}			
+	//populate place names 7
+	case 6:
+		if (!$importEngine->populatePlaceNames()){
+			exit;
+		} else {
+			$importEngine->addTracker(7,$importProgress);
+		}			
+	//populate adjacencies 8
+	case 7:
+		if (!$importEngine->populateAdjacencies()){
+			exit;
+		} else {
+			$importEngine->addTracker(8,$importProgress);
+		}		
+	//populate parents 9
+	case 8:
+		if (!$importEngine->populateParents()){
+			exit;
+		} else {
+			$importEngine->addTracker(9,$importProgress);
+		}		
+	//populate children 10
+	case 9:
+		if (!$importEngine->populateChildren()){
+			exit;
+		} else {
+			$importEngine->addTracker(10,$importProgress);
+		}	
+	//populate ancestors 11
+	case 10:
+		if (!$importEngine->populateAncestors()){
+			exit;
+		} else {
+			$importEngine->addTracker(11,$importProgress);
+		}	
+	//populate ancestors 12
+	case 11:
+		if (!$importEngine->populateDescendants()){
+			exit;
+		} else {
+			$importEngine->addTracker(12,$importProgress);
+		}	
+	//Complete import
+	case 12:
+		$importEngine->dropTrackerTable($importProgress);
+		echo "Import complete\n";
+}
+
+
+

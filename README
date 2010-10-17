@@ -80,3 +80,9 @@ Import Notes:
 - MySQL max_allowed_packet required 20MB
 - Largest array produced thereafter at runtime is just under 18MB (UK descendants)
 
+TODO
+--------------------------
+- Siblings data optimization
+- BelongTo service integration
+- Name search JS code examples for as-you-type lookup
+
