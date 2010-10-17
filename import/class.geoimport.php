@@ -333,7 +333,7 @@ class geoimport extends geoengine {
 		echo "Populating placetypes...";
 		//check table is there
 		if (!$this->tableExists(self::TABLEPLACETYPES)){
-			echo "Table ".self::TABLEPLACETYPES." does not exist\n";
+			echo "Table ".self::TABLEPLACETYPES." does not exist. See ".$this->logFile." for debug information\n";
 			return false;
 		}
 		$SQL = "INSERT INTO `".self::TABLEPLACETYPES."` VALUES (6,\"Street\",\"A street\",\"Street\"),(7,\"Town\",\"A populated settlement such as a city, town, village\",\"Town\"),(8,\"State\",\"One of the primary administrative areas within a country\",\"State\"),(9,\"County\",\"One of the secondary administrative areas within a country\",\"County\"),(10,\"Local Administrative Area\",\"One of the tertiary administrative areas within a country\",\"LocalAdmin\"),(11,\"Postal Code\",\"A partial or full postal code\",\"Zip\"),(12,\"Country\",\"One of the countries or dependent territories defined by the ISO 3166-1 standard\",\"Country\"),(13,\"Island\",\"An island\",\"Island\"),(14,\"Airport\",\"An airport\",\"Airport\"),(15,\"Drainage\",\"A water feature such as a river, canal, lake, bay, ocean\",\"Drainage\"),(16,\"Land Feature\",\"A land feature such as a park, mountain, beach\",\"LandFeature\"),(17,\"Miscellaneous\",\"A uncategorized place\",\"Miscellaneous\"),(18,\"Nationality\",\"An area affiliated with a nationality\",\"Nationality\"),(19,\"Supername\",\"An area covering multiple countries\",\"Supername\"),(20,\"Point of Interest\",\"A point of interest such as a school, hospital, tourist attraction\",\"POI\"),(21,\"Region\",\"An area covering portions of several countries\",\"Region\"),(22,\"Suburb\",\"A subdivision of a town such as a suburb or neighborhood\",\"Suburb\"),(23,\"Sports Team\",\"A sports team\",\"Sports Team\"),(24,\"Colloquial\",\"A place known by a colloquial name\",\"Colloquial\"),(25,\"Zone\",\"An area known within a specific context such as MSA or area code\",\"Zone\"),(26,\"Historical State\",\"A historical primary administrative area within a country\",\"HistoricalState\"),(27,\"Historical County\",\"A historical secondary administrative area within a country\",\"HistoricalCounty\"),(29,\"Continent\",\"One of the major land masses on the Earth\",\"Continent\"),(31,\"Time Zone\",\"An area defined by the Olson standard (tz database)\",\"Timezone\"),(32,\"Nearby Intersection\",\"An intersection of streets that is nearby to the streets in a query string\",\"Nearby Intersection\"),(33,\"Estate\",\"A housing development or subdivision known by name\",\"Estate\"),(35,\"Historical Town\",\"A historical populated settlement that is no longer known by its original name\",\"HistoricalTown\"),(36,\"Aggregate\",\"An aggregate place\",\"Aggregate\"),(37,\"Ocean\",\"One of the five major bodies of water on the Earth\",\"Ocean\"),(38,\"Sea\",\"An area of open water smaller than an ocean\",\"Sea\")";
@@ -347,6 +347,7 @@ class geoimport extends geoengine {
 	}
 	
 	/**Check table exists
+	 * If not table found, dumps which ones were found to log
 	 * @param $tableName
 	 * @return bool
 	 */
@@ -354,6 +355,13 @@ class geoimport extends geoengine {
 		$SQL = "DESC ".$tableName;
 		$result = $this->queryDB($SQL);
 		if (mysql_errno()==1146){
+			$SQL2 = "SHOW TABLES";
+			$result2 = $this->queryDB($SQL2);
+			$logMsg = "Found the following tables:\n";
+			while ($row2 = $result2->fetch_array(MYSQL_NUM)) { 
+				$logMsg .=  "\t".$row2[0]."\n";
+			}
+			$this->logMsg($logMsg);
 			return false;
 		} else {
 			return true;
