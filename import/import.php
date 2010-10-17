@@ -14,17 +14,15 @@
  * Temp tables require 50 GB
  */
 
-//Full path to raw geoplanet files
+//Full path to raw geoplanet files (change to suit your own path)
 $files['aliases'] = "/tmp/geoplanet_aliases_7.5.2.tsv";
-$file['places'] = "/tmp/geoplanet_places_7.5.2.tsv";
-$file['adjacencies'] = "/tmp/geoplanet_adjacencies_7.5.2.tsv";
+$files['places'] = "/tmp/geoplanet_places_7.5.2.tsv";
+$files['adjacencies'] = "/tmp/geoplanet_adjacencies_7.5.2.tsv";
 //==================== Usually no need to edit below this line =================
-
-set_time_limit(0);		  //takes a while
+set_time_limit(0);		  //no timeout
 error_reporting(E_ERROR); //runtime error reporting
 require_once ('class.geoimport.php');
-$importEngine = new geoimport;			
-								
+$importEngine = new geoimport;									
 //check files
 foreach ($files as $file){
 	if (!file_exists($file)){
@@ -39,8 +37,8 @@ if (!$importEngine->createDatabase()){exit;}
 //import files
 echo "Importing Yahoo Geoplanet Data\n";
 if (!$importEngine->populatePlaceTypes()){exit;}
-if (!$importEngine->importAdjacencies($file['adjacencies'])){exit;}
-if (!$importEngine->importPlaces($file['places'])){exit;}
+if (!$importEngine->importAdjacencies($files['adjacencies'])){exit;}
+if (!$importEngine->importPlaces($files['places'])){exit;}
 if (!$importEngine->importAliases($files['aliases'])){exit;}
 //optimize data
 if (!$importEngine->populatePlaces()){exit;}
