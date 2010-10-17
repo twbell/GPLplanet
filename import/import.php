@@ -25,8 +25,8 @@ require_once ('class.geoimport.php');
 $importEngine = new geoimport;									
 //check files
 foreach ($files as $file){
-	if (!file_exists($file)){
-		echo "Cannot find file ".$file;
+	if (!is_readable($file)){
+		echo "Cannot read file ".$file;
 		exit;
 	}
 }
