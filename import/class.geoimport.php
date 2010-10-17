@@ -324,11 +324,7 @@ class geoimport extends geoengine {
 			exit;
 		} else {
 			echo "Tables created in ".$this->dbName."\n";
-			//mysqli_free_result($result);						//avoids 'commands out of sync' error
-			
 			unset($this->db);								//avoids 'commands out of sync' error
-			
-			
 		}
 		return true;	
 	}
@@ -510,22 +506,15 @@ class geoimport extends geoengine {
 		$this->disableKeys(self :: TABLEPLACES);											//Disable keys
 		//Optimise places
 		$SQL = "INSERT INTO " . self :: TABLEPLACES . " (woeid,name,placetypename,country)
-					SELECT woeid, name, placetype, iso 
-					FROM  " . self :: RAWPLACES . " 
-					WHERE placetype != \"sport\""; //sportsteams not included
-		if ($this->queryDB($SQL)) {
-			//Add place type codes
-			$SQL = "UPDATE " . self :: TABLEPLACES . "," . self :: TABLEPLACETYPES . "
-					 SET " . self :: TABLEPLACES . ".placetype=" . self :: TABLEPLACETYPES . ".id 
-					 WHERE " . self :: TABLEPLACES . ".placetypename=" . self :: TABLEPLACETYPES . ".shortname";
-			if ($this->queryDB($SQL)) {
-				//rebuild keys
-				$this->enableKeys(self :: TABLEPLACES);
-				echo " complete\n";
-				return true;
-			} else {
-				return false;
-			}
+				SELECT woeid, name, placetype, iso 
+				FROM  " . self :: RAWPLACES . " 
+				WHERE placetype != \"sport\" AND woeid NOT IN(SELECT woeid FROM ".self :: TABLEPLACES.")"; //sportsteams not included (because they're not f'ing places)
+		$result = $this->queryDB($SQL);
+		if ($result) {
+			//rebuild keys
+			$this->enableKeys(self :: TABLEPLACES);
+			echo " complete\n";
+			return true;
 		} else {
 			return false;
 		}
