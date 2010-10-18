@@ -522,7 +522,7 @@ class geoimport extends geoengine {
 		$this->disableKeys(self :: TABLEPLACENAMES);											
 		$SQL = "INSERT INTO " . self::TABLEPLACENAMES . "(woeid,pref,name,nametype)
 				SELECT woeid, 1, name, NULL
-				FROM " . self :: TABLEPLACES. " WHERE woeid NOT IN (SELECT DISTINCT woeid FROM ".self::TABLEPLACENAMES." WHERE pref=1)";
+				FROM " . self :: TABLEPLACES. " WHERE woeid NOT IN (SELECT woeid FROM ".self::TABLEPLACENAMES." WHERE pref=1)";
 		if ($this->queryDB($SQL)) {
 			$this->enableKeys(self :: TABLEPLACENAMES);											
 			echo " complete\n";
@@ -542,7 +542,7 @@ class geoimport extends geoengine {
 		$SQL = "INSERT INTO " . self::TABLEPLACENAMES . "(woeid,pref,name,nametype,lang)
 			SELECT " . self :: RAWALIASES . ".woeid, 0, " . self :: RAWALIASES . ".name, " . self :: RAWALIASES . ".nametype,". self :: RAWALIASES . ".lang
 			FROM " . self :: RAWALIASES . "," . self :: TABLEPLACES . "
-			WHERE " . self :: RAWALIASES . ".woeid=" . self :: TABLEPLACES . ".woeid AND " . self :: RAWALIASES . ".woeid NOT IN (SELECT DISTINCT woeid FROM ".self::TABLEPLACENAMES." WHERE pref=0)";
+			WHERE " . self :: RAWALIASES . ".woeid=" . self :: TABLEPLACES . ".woeid AND " . self :: RAWALIASES . ".woeid NOT IN (SELECT woeid FROM ".self::TABLEPLACENAMES." WHERE pref=0)";
 		if ($this->queryDB($SQL)) {
 			$this->enableKeys(self :: TABLEPLACENAMES);											
 			echo " complete\n";
