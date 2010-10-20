@@ -507,9 +507,16 @@ class geoimport extends geoengine {
 	 * @return array
 	 */
 	public function populatePlaceNames() {
+		$this->disableKeys(self :: TABLEPLACENAMES);	
+		echo "Populating preferred placenames...\n";
 		$this->populatePreferredNames(); 				//Populate preferred placenames from Places table
-		$this->populateNonPreferredNames(); 			//Populate alternative aliases from Aliases table
+		echo "\talternative placenames...\n";	
+		$this->populateNonPreferredNames(); 	
+		echo "\tenabling keys...\n";					//Populate alternative aliases from Aliases table
+		$this->enableKeys(self :: TABLEPLACENAMES);	
+		echo "\tadding placetypes...\n";	
 		$this->typePlaceNames();						//add numeric placetypes to aliases for efficiency
+		echo "Complete\n";
 		return true;
 	}
 	
@@ -517,15 +524,11 @@ class geoimport extends geoengine {
 	 * Populates Preferred Placenames from Places
 	 * @return Bool
 	 */
-	protected function populatePreferredNames() {
-		echo "Populating preferred placenames...";
-		$this->disableKeys(self :: TABLEPLACENAMES);											
+	protected function populatePreferredNames() {				
 		$SQL = "INSERT INTO " . self::TABLEPLACENAMES . "(woeid,pref,name,nametype)
 				SELECT woeid, 1, name, NULL
-				FROM " . self :: TABLEPLACES. " WHERE woeid NOT IN (SELECT woeid FROM ".self::TABLEPLACENAMES." WHERE pref=1)";
+				FROM " . self :: TABLEPLACES;
 		if ($this->queryDB($SQL)) {
-			$this->enableKeys(self :: TABLEPLACENAMES);											
-			echo " complete\n";
 			return true;
 		} else {
 			return false;
@@ -537,15 +540,10 @@ class geoimport extends geoengine {
 	 * @return Bool
 	 */
 	protected function populateNonPreferredNames() {
-		echo "Populating alternative placenames...";
-		$this->disableKeys(self :: TABLEPLACENAMES);		
 		$SQL = "INSERT INTO " . self::TABLEPLACENAMES . "(woeid,pref,name,nametype,lang)
 			SELECT " . self :: RAWALIASES . ".woeid, 0, " . self :: RAWALIASES . ".name, " . self :: RAWALIASES . ".nametype,". self :: RAWALIASES . ".lang
-			FROM " . self :: RAWALIASES . "
-			WHERE " . self :: RAWALIASES . ".woeid NOT IN (SELECT woeid FROM ".self::TABLEPLACENAMES." WHERE pref=0)"; //sub select prevents re-insertion of dupes on interrupted process
+			FROM " . self :: RAWALIASES; 
 		if ($this->queryDB($SQL)) {
-			$this->enableKeys(self :: TABLEPLACENAMES);											
-			echo " complete\n";
 			return true;
 		} else {
 			return false;

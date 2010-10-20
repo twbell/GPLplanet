@@ -90,6 +90,7 @@ switch ($lastStage) {
 		}			
 	//populate place names 7
 	case 6:
+		//@todo: placenames table should be truncated, as this script cannot pick up where left off (efficiency)
 		if (!$importEngine->populatePlaceNames()){
 			exit;
 		} else {
