@@ -481,7 +481,7 @@ class geoimport extends geoengine {
 	* @return Bool
 	*/
 	public function populateAdjacencies() {
-		echo "Populating adjacencies...";
+		echo "Populating adjacencies... ";
 		$SQL1 = "SELECT woeid FROM ".self :: TABLEPLACES;
 		$SQL2 = "SELECT neighbor FROM " . self::RAWADJACENCIES . " WHERE woeid="; //get adjacencies for once place at time
 		$SQL3 = "INSERT INTO " . self::TABLEADJACENCIES . "(woeid,adjacencies) VALUES "; //insert
@@ -497,8 +497,9 @@ class geoimport extends geoengine {
 				unset($tempArray);
 			}
 		}
+		echo "building index... ";	
 		$this->enableKeys(self :: TABLEADJACENCIES);
-		echo " complete\n";
+		echo "complete\n";
 		return true;
 	}
 	
@@ -512,11 +513,11 @@ class geoimport extends geoengine {
 		$this->populatePreferredNames(); 				//Populate preferred placenames from Places table
 		echo "\talternative placenames...\n";	
 		$this->populateNonPreferredNames(); 	
-		echo "\tenabling keys...\n";					//Populate alternative aliases from Aliases table
+		echo "\tbuilding index...\n";					//Populate alternative aliases from Aliases table
 		$this->enableKeys(self :: TABLEPLACENAMES);	
 		echo "\tadding placetypes...\n";	
 		$this->typePlaceNames();						//add numeric placetypes to aliases for efficiency
-		echo "Complete\n";
+		echo "\tcomplete\n";
 		return true;
 	}
 	
@@ -555,12 +556,10 @@ class geoimport extends geoengine {
 	* @return Bool
 	*/
 	protected function typePlaceNames() {
-		echo "Updating placenames table with placetype codes...";
 		$SQL = "UPDATE " . self :: TABLEPLACENAMES . "," . self :: TABLEPLACES . "
 				SET " . self :: TABLEPLACENAMES . ".placetype=" . self :: TABLEPLACES . ".placetype 
 				WHERE " . self :: TABLEPLACENAMES . ".woeid=" . self :: TABLEPLACES . ".woeid";
 		if ($this->queryDB($SQL)) {											
-			echo " complete\n";
 			return true;
 		} else {
 			return false;
@@ -584,7 +583,6 @@ class geoimport extends geoengine {
 	*/
 	protected function enableKeys($tableName) {
 		$SQL = "ALTER TABLE " . $tableName . " ENABLE KEYS";
-		echo " building keys...";
 		return $this->queryDB($SQL);
 	}
 
