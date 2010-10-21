@@ -109,7 +109,7 @@ class geoimport extends geoengine {
 			$result1 = $this->queryDB($SQL1);
 			$rowCount = $result1->num_rows;
 			if ($rowCount > 0){
-				echo "\t".$rowCount." ".$this->placeTypeLookup($placeType)."s unprocessed; processing... \n";
+				echo "\t".$rowCount." ".$this->placeTypeLookup($placeType)."s unprocessed; processing... ";
 				while ($row1 = $result1->fetch_array(MYSQLI_ASSOC)) {
 					$this->getDescendants($row1['woeid']);										//this calculates _and_ writes to table 	
 				}
