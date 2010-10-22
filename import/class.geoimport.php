@@ -393,7 +393,7 @@ class geoimport extends geoengine {
 			return false;
 		}
 		//see if already populated
-		$SQL1 = "SELECT COUNT(id) AS res FROM ".self::TABLEPLACETYPES;
+		$SQL1 = "SELECT id AS res FROM ".self::TABLEPLACETYPES;
 		$result1 = $this->queryDB($SQL1);
 		if (!$result1) {
 			echo "Error querying placetypes table: ".$this->db->error;
