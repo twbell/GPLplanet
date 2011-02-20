@@ -145,6 +145,20 @@ CREATE TABLE IF NOT EXISTS `geo_siblings` (
   PRIMARY KEY (`woeid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci  COMMENT='Siblings lookup';
 
+
+--
+-- Create table `cache_geocode`
+--
+CREATE TABLE IF NOT EXISTS `geo`.`cache_geocode` (
+  `md5` char(32)  NOT NULL,
+  `query` text  NOT NULL,
+  `response` text  NOT NULL,
+  `timestamp` timestamp  NOT NULL,
+  PRIMARY KEY (`md5`)
+)
+ENGINE = MyISAM
+COMMENT = 'saved geocode content';
+
 --
 -- Create table `raw_adjacencies`
 --
