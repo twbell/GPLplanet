@@ -501,7 +501,7 @@ class geoengine {
 	* @param string SQL SQL statement
 	* @return mysqli result object
 	*/
-	protected function queryDB($SQL) {
+	public function queryDB($SQL) {
 		$err = "Error: ";
 		if (!$this->db) {
 			$this->connectDB();

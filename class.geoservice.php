@@ -15,9 +15,56 @@ class geoservice {
 	public $yqlEndPoint = 'http://query.yahooapis.com/v1/public/yql'; //public query endpoint														//where we store boss api keys and config
 	private static $_instance; //singleton management
 	public $flags = "G"; 	//geocoder flags
+	const TABLEGEOCODECACHE = "cache_geocode"; 
+	public $cache = true;		//cache geocoder calls
 
 	//============== Methods ===================================
 
+	/**
+	 * Caches geocode call
+	 * @param string query
+	 * @param string response
+	 * $return bool
+	 */
+	protected function writeGeoCodeCache($query,$response){
+		if ($this->cache){			
+			$md5 = md5($query);
+			$query = $this->getEngine()->escapeString(serialize($query));
+			$response = $this->getEngine()->escapeString(serialize($response));
+			$SQL = "INSERT INTO ".self::TABLEGEOCODECACHE." (md5,query,response) VALUES (\"".$md5."\",\"".$query."\",\"".$response."\")";
+			$res = $this->getEngine()->queryDB($SQL);
+			if (!$res) {
+				$this->logMsg(__METHOD__." failed");
+				return false;
+			}	
+		}
+		return true;
+	}
+	
+	/**
+	 * Caches geocode call
+	 * @param string query
+	 * $return bool
+	 */
+	protected function readGeoCodeCache($query){
+		if ($this->cache){		
+			$md5 = md5($query);
+			$SQL = "SELECT response FROM ".self::TABLEGEOCODECACHE." WHERE md5=\"".$md5."\"";
+			$res = $this->getEngine()->queryDB($SQL);
+			if (!$res) {
+				$this->logMsg(__METHOD__." failed");
+				return false;
+			}	
+			if ($res->num_rows == 1) {
+				$row = $res->fetch_array(MYSQLI_ASSOC);
+				return unserialize($row['response']);
+			} else {
+				return false;
+			}
+		}
+		return false;
+	}	
+	
 	/**
 	 * Singleton retreival
 	 */
@@ -49,21 +96,26 @@ class geoservice {
 		if ($this->flags){
 			$q .= " AND flags=\"".$this->flags."\"";
 		}
+		
+		//check cache
+		if ($res = $this->readGeoCodeCache($q)){
+			return $res;
+		}
+		//hit geocode service
 		$res = $this->query($q);
 		if (!$res) {
 			return false;
 		}
 		if ($res->query->count > 0) {
-			return get_object_vars($res->query->results->Result);
-			/*
-			foreach ($res->query->results as $result) {
-				$aRes[] = get_object_vars($result);
+			if (is_object($res->query->results->Result)){			
+				$returnVals = get_object_vars($res->query->results->Result);
+				$this->writeGeoCodeCache($q,$returnVals); //write cache
+				return $returnVals;
+			} else {
+				return array (); //empty result
 			}
-			return $aRes;
-			*/
-			
 		} else {
-			return array ();
+			return array (); //no result
 		}
 	}
 
@@ -154,17 +206,28 @@ class geoservice {
 			return false;
 		}
 		$q = "select * from geo.places where text=\"" . $q . "\" AND focus=" . $focus;
+		if ($this->flags){
+			$q .= " AND flags=\"".$this->flags."\"";
+		}
+		//check cache
+		if ($res = $this->readGeoCodeCache($q)){
+			return $res;
+		}
+		//hit geocode service
 		$res = $this->query($q);
 		if (!$res) {
 			return false;
 		}
 		if ($res->query->count > 0) {
-			foreach ($res->query->results as $result) {
-				$aRes[] = get_object_vars($result);
+			if (is_object($res->query->results->Result)){			
+				$returnVals = get_object_vars($res->query->results->Result);
+				$this->writeGeoCodeCache($q,$returnVals); //write cache
+				return $returnVals;
+			} else {
+				return array (); //empty result
 			}
-			return $aRes;
 		} else {
-			return array ();
+			return array (); //no result
 		}
 	}
 
@@ -175,18 +238,26 @@ class geoservice {
 	* @return array single result
 	*/
 	public function reverseGeocode($lon, $lat) {
-		//$q = "SELECT * from geo.placefinder WHERE text=\"" . $lat . "," . $lon . "\" AND flags=\"G\" AND gflags=\"R\"";
 		$q = "SELECT * from geo.placefinder WHERE text=\"" . $lat . "," . $lon . "\" AND gflags=\"R\"";
 		if ($this->flags){
 			$q .= " AND flags=\"".$this->flags."\"";
+		}	
+		//check cache
+		if ($res = $this->readGeoCodeCache($q)){
+			return $res;
 		}
-		
+		//hit geocode service
 		$res = $this->query($q);
 		if (!$res) {
 			return false;
 		}
 		if ($res->query->count > 0) {
-			return get_object_vars($res->query->results->Result);
+			$returnVals = get_object_vars($res->query->results->Result);
+			if ($returnVals['quality'] == 99){
+				$returnVals['line1'] = ""; 			//strip out coordinate pair as line1
+			}
+			$this->writeGeoCodeCache($q,$returnVals); //write cache
+			return $returnVals;
 		} else {
 			return array ();
 		}
