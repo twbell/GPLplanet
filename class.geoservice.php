@@ -5,7 +5,7 @@
  * geoservice - wraps geo web services. Use as standalone or more powerfully with gplplanet::geoengine
  * @package gplplanet
  * @author Tyler Bell tylerwbell[at]gmail[dot]com
- * @copyright (C) 2009,2010 - Tyler Bell
+ * @copyright (C) 2009,2011 - Tyler Bell
  * @todo Authenticated YQL
  * @license GNU General Public License
  */
@@ -14,6 +14,7 @@ class geoservice {
 
 	public $yqlEndPoint = 'http://query.yahooapis.com/v1/public/yql'; //public query endpoint														//where we store boss api keys and config
 	private static $_instance; //singleton management
+	public $flags = "G"; 	//geocoder flags
 
 	//============== Methods ===================================
 
@@ -45,15 +46,22 @@ class geoservice {
 	*/
 	public function geocode($q) {
 		$q = "SELECT * FROM geo.placefinder WHERE text=\"" . $q . "\"";
+		if ($this->flags){
+			$q .= " AND flags=\"".$this->flags."\"";
+		}
 		$res = $this->query($q);
 		if (!$res) {
 			return false;
 		}
 		if ($res->query->count > 0) {
+			return get_object_vars($res->query->results->Result);
+			/*
 			foreach ($res->query->results as $result) {
 				$aRes[] = get_object_vars($result);
 			}
 			return $aRes;
+			*/
+			
 		} else {
 			return array ();
 		}
@@ -167,7 +175,12 @@ class geoservice {
 	* @return array single result
 	*/
 	public function reverseGeocode($lon, $lat) {
+		//$q = "SELECT * from geo.placefinder WHERE text=\"" . $lat . "," . $lon . "\" AND flags=\"G\" AND gflags=\"R\"";
 		$q = "SELECT * from geo.placefinder WHERE text=\"" . $lat . "," . $lon . "\" AND gflags=\"R\"";
+		if ($this->flags){
+			$q .= " AND flags=\"".$this->flags."\"";
+		}
+		
 		$res = $this->query($q);
 		if (!$res) {
 			return false;
