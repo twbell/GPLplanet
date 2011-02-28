@@ -34,6 +34,7 @@ class geoengine {
 	const TABLESIBLINGS = "geo_siblings";
 	const TABLEANCESTORS = "geo_ancestors";
 	const TABLEDISAMBIGUATE = "cache_disambiguate";
+	const TABLECOUNTRIES = "geo_countries";
 
 	//misc
 	protected static $_instance; //singleton management\
@@ -54,23 +55,43 @@ class geoengine {
 	}
 
 
-  /**
-  * Waits appropriate time before calling webservice again
-  * @param timestamp unix timestamp
-  * @return array
-  */  
- function webserviceWait(){
- 	global $webServiceWait;
- 	if (!$this->lastQuery){return true;} //no last query
- 	$microTime = microtime(true);
- 	$timeSince = $microTime-$lastQuery;
- 	if ($timeSince > $webServiceWait){
- 		return true;
- 	} else {
- 		usleep($timeSince);
- 		return true;
- 	}
- }
+	/**
+	 * Gets geo object from alpha-2 country code
+	 * @param string alpha2 two-letter country code
+	 * @return geo object
+	 */
+	public function getGeoByAlpha2($alpha2){
+		$SQL = "SELECT woeid FROM " . self :: TABLECOUNTRIES . " WHERE alpha2=\"" . $alpha2 . "\"";	
+		$result = $this->queryDB($SQL);
+		if (!$result) {
+			$this->logMsg(__METHOD__ . " error");
+			return false;
+		}
+		if ($result->num_rows === 0) {
+			return false;
+		}
+		$row = $result->fetch_array(MYSQLI_ASSOC);
+		return $this->getGeo($row['woeid']);
+	}
+
+	/**
+	 * Gets geo object from alpha-3 country code
+	 * @param string alpha3 three-letter country code
+	 * @return geo object
+	 */
+	public function getGeoByAlpha3($alpha3){
+		$SQL = "SELECT woeid FROM " . self :: TABLECOUNTRIES . " WHERE alpha3=\"" . $alpha3 . "\"";	
+		$result = $this->queryDB($SQL);
+		if (!$result) {
+			$this->logMsg(__METHOD__ . " error");
+			return false;
+		}
+		if ($result->num_rows === 0) {
+			return false;
+		}
+		$row = $result->fetch_array(MYSQLI_ASSOC);
+		return $this->getGeo($row['woeid']);
+	}
 
 	/**
 	* Gets places with corresponding placename (exact match) 
