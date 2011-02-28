@@ -36,7 +36,8 @@ class geoengine {
 	const TABLEDISAMBIGUATE = "cache_disambiguate";
 
 	//misc
-	protected static $_instance; //singleton management
+	protected static $_instance; //singleton management\
+	protected $lastQuery; //timestamp of last web query, used for
 	public $defaultFocus = 1; //woeid of default focus geography
 
 	//======================== Methods =======================================	
@@ -51,6 +52,25 @@ class geoengine {
 		}
 		return self :: $_instance;
 	}
+
+
+  /**
+  * Waits appropriate time before calling webservice again
+  * @param timestamp unix timestamp
+  * @return array
+  */  
+ function webserviceWait(){
+ 	global $webServiceWait;
+ 	if (!$this->lastQuery){return true;} //no last query
+ 	$microTime = microtime(true);
+ 	$timeSince = $microTime-$lastQuery;
+ 	if ($timeSince > $webServiceWait){
+ 		return true;
+ 	} else {
+ 		usleep($timeSince);
+ 		return true;
+ 	}
+ }
 
 	/**
 	* Gets places with corresponding placename (exact match) 
@@ -74,6 +94,30 @@ class geoengine {
 		}
 		return $aTemp;
 	}
+
+
+	/**
+	* Gets places a specific type in a specific country 
+	* @param int typecode
+	* @param string two-letter country code
+	* @return array of woeids
+	*/
+	public function getByTypeCountry($typeCode,$countryCode) {
+		$SQL = "SELECT woeid FROM " . self :: TABLEPLACES . " WHERE placetype=".$typeCode." AND country=\"" . $countryCode . "\"";
+		$result = $this->queryDB($SQL);
+		if (!$result) {
+			$this->logMsg(__METHOD__ . " error searching on place type and name ");
+			return false;
+		}
+		if ($result->num_rows === 0) {
+			return array ();
+		}
+		while ($row = $result->fetch_array(MYSQLI_ASSOC)) {
+			$aTemp[] = $row['woeid'];
+		}
+		return $aTemp;
+	}
+
 
 	/**
 	* Gets most probable woeid return for a placename/string query

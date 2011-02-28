@@ -15,10 +15,35 @@ class geoservice {
 	public $yqlEndPoint = 'http://query.yahooapis.com/v1/public/yql'; //public query endpoint														//where we store boss api keys and config
 	private static $_instance; //singleton management
 	public $flags = "G"; 	//geocoder flags
-	const TABLEGEOCODECACHE = "cache_geocode"; 
-	public $cache = true;		//cache geocoder calls
 
-	//============== Methods ===================================
+	//cache control
+	public $cache = true;		//cache geocoder calls
+	
+	//web service timings
+	protected $lastQuery; //timestamp of last web query, used to control calls-per-second 	 
+ 	protected $webServiceWait = 500000;  //webservice wait between calls in microseconds (0 = no wait)
+
+	//table definitions
+	const TABLEGEOCODECACHE = "cache_geocode";  
+
+	//============================= Methods =================================
+	
+	 /**
+	 * Pauses script appropriate time before calling webservice again
+	 * @param timestamp unix timestamp
+	 * @return array
+	 */  
+	 protected function webserviceWait(){
+	 	if (!$this->lastQuery){return true;} //no previous query
+	 	$microTime = microtime(true);
+	 	$timeSince = $microTime-$this->lastQuery;
+	 	if ($timeSince > $this->webServiceWait){
+	 		return true;
+	 	} else {
+	 		usleep($timeSince);
+	 		return true;
+	 	}
+	 }
 
 	/**
 	 * Caches geocode call
@@ -96,11 +121,12 @@ class geoservice {
 		if ($this->flags){
 			$q .= " AND flags=\"".$this->flags."\"";
 		}
-		
+		  
 		//check cache
 		if ($res = $this->readGeoCodeCache($q)){
 			return $res;
-		}
+		} 
+		
 		//hit geocode service
 		$res = $this->query($q);
 		if (!$res) {
@@ -343,7 +369,7 @@ class geoservice {
 		$sData = implode("&", $aVarComb);
 		unset ($aVarComb);
 		$endPoint = $this->yqlEndPoint . "?q=" . urlencode($qString) . "&" . $sData;
-
+		$this->webserviceWait();		//pause if required before calling webservice again
 		@ $result = file_get_contents($endPoint);
 
 		if (!$result) {
