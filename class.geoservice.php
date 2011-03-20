@@ -12,7 +12,7 @@
 
 class geoservice {
 
-	public $yqlEndPoint = 'http://query.yahooapis.com/v1/public/yql'; //public query endpoint														//where we store boss api keys and config
+	public $yqlEndPoint = 'http://query.yahooapis.com/v1/public/yql'; //public query endpoint													
 	private static $_instance; //singleton management
 	public $flags = "G"; 	//geocoder flags
 
@@ -120,13 +120,11 @@ class geoservice {
 		$q = "SELECT * FROM geo.placefinder WHERE text=\"" . $q . "\"";
 		if ($this->flags){
 			$q .= " AND flags=\"".$this->flags."\"";
-		}
-		  
+		}  
 		//check cache
 		if ($res = $this->readGeoCodeCache($q)){
 			return $res;
 		} 
-		
 		//hit geocode service
 		$res = $this->query($q);
 		if (!$res) {

@@ -88,11 +88,13 @@ CREATE TABLE IF NOT EXISTS  `geo_placenames` (
   `nametype` varchar(1) COLLATE utf8_unicode_ci DEFAULT NULL,
   `placetype` tinyint(3) NOT NULL,
   `lang` varchar(3) COLLATE utf8_unicode_ci NOT NULL,
+  `country` varchar(2)  DEFAULT NULL,
   KEY `woeid_idx` (`woeid`),
   KEY `name_idx` (`name`),
   KEY `nametype_idx` (`nametype`),
   KEY `placetype_idx` (`placetype`),
-  KEY `pref_idx` (`pref`)
+  KEY `pref_idx` (`pref`),
+  KEY `country_idx` (`country`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci  COMMENT='All placenames';
 --
 -- Create table `geo_places`

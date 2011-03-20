@@ -381,6 +381,22 @@ class geoimport extends geoengine {
 	}
 	
 	/**
+	 * Adds alpha2 country code to names table (provides convenient shortcut)
+	 * @return bool
+	 */	
+	protected function addCountryToNames(){
+		$SQL1 = "UPDATE ".self::TABLEPLACENAMES.",".self::TABLEPLACES;
+		$SQL1 .= " SET ".self::TABLEPLACENAMES.".country = ".self::TABLEPLACES.".country";
+		$SQL1 .= " WHERE ".self::TABLEPLACENAMES.".woeid = ".self::TABLEPLACES.".woeid";
+		$result1 = $this->queryDB($SQL1);
+		if (!$result1) {
+			echo "Error updating placenames with country code: ".$this->db->error;
+			return false;
+		}			
+		return true;		
+	}
+	
+	/**
 	 * Populate placetype table with data
 	 * Unlike other methods, this is the only one where the code contains the data to be poulated (as placetypes rarely change between versions, and the structured lookup is available only via the web service)
 	 * @return bool
@@ -517,6 +533,8 @@ class geoimport extends geoengine {
 		$this->enableKeys(self :: TABLEPLACENAMES);	
 		echo "\tadding placetypes...\n";	
 		$this->typePlaceNames();						//add numeric placetypes to aliases for efficiency
+		echo "\tadding country code...\n";
+		$this->addCountryToNames();						//add country code to names for efficiency
 		echo "\tcomplete\n";
 		return true;
 	}
