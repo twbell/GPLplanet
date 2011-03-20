@@ -8,7 +8,7 @@
  * 
  * @package gplplanet
  * @author Tyler Bell tylerwbell[at]gmail[dot]com
- * @copyright (C) 2009,2010 - Tyler Bell
+ * @copyright (C) 2009-2011 - Tyler Bell
  * @license GNU General Public License
  * Ensure php.ini memory_limit is set to 1GB for handling large arrays
  * Temp tables require 50 GB HDD space
