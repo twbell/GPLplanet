@@ -4,7 +4,7 @@
  * (1) Configure database vars in config.ini
  * (2) Download geoplanet data from http://developer.yahoo.com/geo/geoplanet/data/
  * (3) Add file names to the file variables below
- * (4) Run this script from the command line, i.e. "php import.php"
+ * (4) Run this script from the command line: "php import.php"
  * 
  * @package gplplanet
  * @author Tyler Bell tylerwbell[at]gmail[dot]com
