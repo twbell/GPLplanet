@@ -31,32 +31,63 @@ where required.  In a nutshell:
 - Imports GeoPlanet TSV
 - Provides PHP wrappers for getParents(), getChildren(), disambiguate() etc. methods
 - Wraps geocode(), reverseGeocode(), and getElevation() calls (Web Service only)
-- Gets and caches coordinates for woeids (not supplied with data dump)
+- Gets and caches coordinate data for woeids (not supplied with data dump)
 - Provides sample Web service scripts for deployment examples SaaS environments
 
 These libraries are intended to make a local instance of GeoPlanet more accessible and easier to 
 understand before implementing in production. If you are looking for a simple GeoPlanet
 Web-service-only wrapper, see Tyler Hall's http://github.com/tylerhall/php-geoplanet/.
   
-EXAMPLES
+GETTING STARTED
 ---------------------
+Require the geoengine class and get an instance thereof:
+
 require_once('class.geoengine.php');			
 $engine = geoengine::getInstance();             //geoengine is a factory singleton
+
+METHOD EXAMPLES
+---------------------
 $engine->disambiguate("springfield");           //the most likely 'Springfield'
 $engine->getChildren(31278);                    //children of woeid 31278 (Oxford, UK)
-$engine->getElevationByWOEID(2461928);          //elevation of woeid 2461928 (Northfield, MN)
+$engine->getParent(31278);                    	//parent of woeid 31278
+$engine->getElevationByWOEID(2461928);          //elevation of woeid 2461928 (Northfield, MN) -- (uses web service)
 $engine->getByName("springfield","UK");         //all places called "Springfield" in UK
-$engine->geocode("1 infinity loop, Cupertino, ca"); //geocodes
-$engine->reverseGeocode(0.151490,52.145329);    //reverse geocodes
-$engine->getBbox(727232);                       //bounding box of Amsterdam
+$engine->geocode("1 infinity loop, Cupertino, ca"); //geocodes -- (uses web service)
+$engine->reverseGeocode(0.151490,52.145329);    //reverse geocodes -- (uses web service)
+$engine->getBbox(727232);                       //bounding box of Amsterdam -- (uses web service)
 $engine->filterByType($engine->getDescendants(23424977),7); //all towns in US
-$engine->getAdjacencies(2468964);               //all towns surrounding woeid 2468964 (Pasedena, CA)
+$engine->getAdjacencies(2468964);               //all entities surrounding woeid 2468964 (Pasedena, CA)
+
+USE OF WEB SERVICE
+---------------------
+Some methods call Yahoo and other web services via YQL.  The results of these calls are cached so (for example) if you 
+request the Bounding box of an entity, the webservice will not be called if request a second time.  The general idea is 
+to seamlessly incorporate the webservice calls only where required.
+
+GEO OBJECTS
+---------------------
+Geo objects are lightweight entities that share a common geoengine singleton -- basically a factory class -- where the bulk of 
+the code (and processing power) lies. They are intended as handy encapsulations but are not required.  All methods 
+return WOEIDs as INT or arrays of INT, which can be instantiated as geo objects.  
+
+	$engine->getGeo(INT);					//instantiates woeid as geo object
+	$engine->getMultiGeo(ARRAY);			//instantiates array of woeids as array of geo object
+	
+Geo objects contain mostly identical methods using the same naming convention as the geoengine factory class:
+
+	$engine->getParent(31278);
+	
+serves the same purpose as:
+	
+	$geo = $engine->getGeo(31278);	
+	$geo->getParent();
 
 FILE OVERVIEW
 -------------------------
 class.geoengine.php         Core methods and factory class; instantiate as singleton
 class.geoservice.php        Methods wrapping YQL calls; instantiated as singleton, when required, by geoengine
 class.geo.php               Geo object representing named-place; instantiated as required by geoengine
+class.db.php               	Database object and methods (dead simple)
 import/class.import.php     Methods for tsv data import
 import/import.php           Procedural script for importing tsv data
 import/geo.sql              SQL script for creating database
@@ -85,4 +116,6 @@ TODO
 - Siblings data optimization
 - BelongTo service integration
 - Name search JS code examples for as-you-type lookup
+- Experiment with SimpleDB
+
 
