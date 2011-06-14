@@ -4,7 +4,7 @@
  * Methods for importing Yahoo GeoPlanet Data. Run import.php file via cmdln to import.
  * @package gplplanet
  * @author Tyler Bell tylerwbell[at]gmail[dot]com
- * @copyright (C) 2009,2010 - Tyler Bell
+ * @copyright (C) 2009-2011 - Tyler Bell
  * @license GNU General Public License
  */ 
 
@@ -26,7 +26,7 @@ class geoimport extends geoengine {
 	public function populateAncestors() {
 		echo "Populating ancestors...";
 		$SQL1 = "SELECT woeid FROM ".self::TABLEPLACES. " WHERE woeid NOT IN (SELECT woeid FROM ".self::TABLEANCESTORS.") AND woeid != 1";  //earth is an orphan
-		$result1 = $this->queryDB($SQL1,true);
+		$result1 = $this->query($SQL1,true);
 		echo "found ".$result1->num_rows." unprocessed ancestors; processing..."; 
 		while ($row1 = $result1->fetch_array(MYSQLI_ASSOC)) {
 			$temp = $row1['woeid'];
@@ -49,7 +49,7 @@ class geoimport extends geoengine {
 			}	
 			if (count($aParents) == 0){continue;}
 			$SQL2  = "INSERT INTO ".self::TABLEANCESTORS." (woeid, ancestors) VALUES (" . $row1['woeid'] . ",\"" . implode(",", $aParents) . "\")";
-			$result2 = $this->queryDB($SQL2);
+			$result2 = $this->query($SQL2);
 			unset($aParents);	
 		}
 		echo " complete\n";
@@ -64,7 +64,7 @@ class geoimport extends geoengine {
 	public function populateSiblings() {
 		echo "Populating siblings...";
 		$SQL1 = "SELECT woeid, placetype FROM ". self::TABLEPLACES." WHERE woeid NOT IN (SELECT woeid FROM ".self::TABLESIBLINGS.")";
-		$result1 = $this->queryDB($SQL1,true);
+		$result1 = $this->query($SQL1,true);
 		echo "Found ".$result1->num_rows." unprocessed siblings; processing..."; 
 		while ($row1 = $result1->fetch_array(MYSQLI_ASSOC)) {
 			$parentID =  $this->getParent($row1['woeid']);
@@ -74,7 +74,7 @@ class geoimport extends geoengine {
 			if (empty($aChildren)){continue;}
 			//get those entities of only that type
 			$SQL4 = "SELECT woeid FROM ".self::TABLEPLACES." WHERE woeid IN (".implode(",",$aChildren).") AND placetype=".$row1['placetype']." AND woeid !=".$row1['woeid'];
-			$result4 = $this->queryDB($SQL4);
+			$result4 = $this->query($SQL4);
 			if ($result4->num_rows === 0){
 				continue;
 			}
@@ -85,7 +85,7 @@ class geoimport extends geoengine {
 			$sSiblings = implode(",",$aSiblings);
 			unset($aSiblings);
 			$SQL5 = "INSERT INTO ".self::TABLESIBLINGS." (woeid, siblings) VALUES (".$row1['woeid'].",\"".$sSiblings."\")"; 
-			$result5 = $this->queryDB($SQL5);	
+			$result5 = $this->query($SQL5);	
 		}
 		echo " complete\n";
 		return true;
@@ -106,7 +106,7 @@ class geoimport extends geoengine {
 			$SQL1 .= " WHERE placetype =".$placeType." AND woeid != 1";						//filter by type and do not need earth
 			$SQL1 .= " AND woeid IN (SELECT parent from ".self::RAWPLACES.")";	//parents only
 			$SQL1 .= " AND woeid NOT IN (SELECT woeid FROM ".self::TABLEDESCENDANTS.")";    //as-yet unprocessed
-			$result1 = $this->queryDB($SQL1);
+			$result1 = $this->query($SQL1);
 			$rowCount = $result1->num_rows;
 			if ($rowCount > 0){
 				echo "\t".$rowCount." ".$this->placeTypeLookup($placeType)."s unprocessed; processing... ";
@@ -129,7 +129,7 @@ class geoimport extends geoengine {
 		$SQL .= " SET " . self::TABLEPLACES . ".placetype=" . self::TABLEPLACETYPES . ".id";
 		$SQL .= " WHERE " . self::TABLEPLACES . ".placetypename=" . self::TABLEPLACETYPES . ".shortname";
 		$SQL .= " AND ". self::TABLEPLACES .".placetype IS NULL";  //gets only those not yet updated
-		$result = $this->queryDB($SQL);
+		$result = $this->query($SQL);
 		if (!$result) {
 			$this->logMsg(__METHOD__."error updating placetype codes");
 			return false;
@@ -137,7 +137,7 @@ class geoimport extends geoengine {
 		//remove index on string placetype; no longer needed after this operation
 		echo " dropping string placetype index...";
 		$SQL1 = "ALTER TABLE `". self::TABLEPLACES . "` DROP INDEX `placetypename_idx`";
-		$result1 = $this->queryDB($SQL1);
+		$result1 = $this->query($SQL1);
 		echo " complete\n";
 		return true;			
 	}
@@ -155,7 +155,7 @@ class geoimport extends geoengine {
 		return false;
 	}
 	$SQL  = "INSERT INTO ".self::TABLEDESCENDANTS." (woeid, descendants) VALUES (" . $woeid . ",\"" . implode(",", $aDescendants) . "\") ON DUPLICATE KEY UPDATE woeid=woeid";					
-	$result = $this->queryDB($SQL);
+	$result = $this->query($SQL);
 	if (!$result) {
 			$this->logMsg(__METHOD__."error on woeid " . $woeid);
 			return false;
@@ -184,7 +184,7 @@ class geoimport extends geoengine {
 		}
 		//get children of woeid		
 		$SQL = "SELECT children FROM ".self::TABLECHILDREN." WHERE woeid=".$woeid;
-		$result = $this->queryDB($SQL);
+		$result = $this->query($SQL);
 		if (!$result) {
 			$this->logMsg(__METHOD__."error on woeid " . $woeid);
 			return false;
@@ -207,7 +207,7 @@ class geoimport extends geoengine {
 					$SQL1Array[] = "(".$woeid.",".$desc.")";
 				}
 				$SQL1 .= implode(",",$SQL1Array);
-				$result1 = $this->queryDB($SQL1);
+				$result1 = $this->query($SQL1);
 				if (!$result1) {
 					$this->logMsg(__METHOD__."error inserting descendants into temp table on woeid " . $woeid);
 					return false;
@@ -216,7 +216,7 @@ class geoimport extends geoengine {
 		}
 		//all descendants are now in a big, vertical temp table; extract, write, delete from temp table, and return
 		$SQL2 = "SELECT DISTINCT descendant FROM ".self::TEMPTABLEDESC." WHERE woeid=".$woeid;
-		$result2 = $this->queryDB($SQL2);
+		$result2 = $this->query($SQL2);
 		if (!$result2) {
 			$this->logMsg(__METHOD__."error obtaining descendants from temp table for woeid " . $woeid);
 			return false;
@@ -229,7 +229,7 @@ class geoimport extends geoengine {
 		$this->insertDescendants($woeid,$tempArray);
 		//delete records from temp table
 		$SQL3 = "DELETE FROM ".self::TEMPTABLEDESC." WHERE woeid=".$woeid;
-		$result3 = $this->queryDB($SQL3);
+		$result3 = $this->query($SQL3);
 		//return
 		return $tempArray;
 	}	
@@ -245,7 +245,7 @@ class geoimport extends geoengine {
 			  `descendant` int(10) unsigned NOT NULL,
 			  KEY `woeid_idx` (`woeid`)
 			) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci COMMENT='Temporary Descendants lookup'";
-		$result = $this->queryDB($SQL);	
+		$result = $this->query($SQL);	
 		return true;	
 	}
 	
@@ -263,7 +263,7 @@ class geoimport extends geoengine {
 				)
 				ENGINE = MyISAM
 				COMMENT = 'Temporary Table for tracking interruptable progress'";
-		$result = $this->queryDB($SQL);		
+		$result = $this->query($SQL);		
 		if (!$result){
 			return false;
 		} else {
@@ -279,7 +279,7 @@ class geoimport extends geoengine {
 	*/	
 	public function dropTrackerTable($name){
 		$SQL = "DROP TABLE IF EXISTS temp_".$name;
-		$result = $this->queryDB($SQL);
+		$result = $this->query($SQL);
 		if (!$result){
 			return false;
 		} else {
@@ -295,7 +295,7 @@ class geoimport extends geoengine {
 	*/	
 	public function addTracker($id,$name){
 		$SQL = "INSERT INTO temp_".$name." (id) VALUES (".$id.")";
-		$result = $this->queryDB($SQL);
+		$result = $this->query($SQL);
 		if (!$result){
 			return false;
 		} else {
@@ -310,7 +310,7 @@ class geoimport extends geoengine {
 	*/	
 	public function getMaxTracker($name){
 		$SQL = "SELECT MAX(id) AS res FROM temp_".$name;
-		$result = $this->queryDB($SQL);
+		$result = $this->query($SQL);
 		if (!$result){
 			return false;
 		} else {
@@ -329,7 +329,7 @@ class geoimport extends geoengine {
 	*/	
 	public function getLastTracker($name){
 		$SQL = "SELECT id AS res FROM temp_".$name." ORDER BY timestamp DESC LIMIT 0,1";
-		$result = $this->queryDB($SQL);
+		$result = $this->query($SQL);
 		if (!$result){
 			return false;
 		} else {
@@ -353,7 +353,7 @@ class geoimport extends geoengine {
 		//create db
 		$this->db = new mysqli($this->dbHost, $this->dbUser, $this->dbPassword); //connect without database name
 		$SQL = "CREATE DATABASE IF NOT EXISTS ".$this->dbName;
-		$result = $this->queryDB($SQL);
+		$result = $this->query($SQL);
 		if (!$result) {
 			echo "Error creating database ".$this->dbName.": ".$this->db->error;
 			exit;
@@ -388,7 +388,7 @@ class geoimport extends geoengine {
 		$SQL1 = "UPDATE ".self::TABLEPLACENAMES.",".self::TABLEPLACES;
 		$SQL1 .= " SET ".self::TABLEPLACENAMES.".country = ".self::TABLEPLACES.".country";
 		$SQL1 .= " WHERE ".self::TABLEPLACENAMES.".woeid = ".self::TABLEPLACES.".woeid";
-		$result1 = $this->queryDB($SQL1);
+		$result1 = $this->query($SQL1);
 		if (!$result1) {
 			echo "Error updating placenames with country code: ".$this->db->error;
 			return false;
@@ -410,7 +410,7 @@ class geoimport extends geoengine {
 		}
 		//see if already populated
 		$SQL1 = "SELECT id AS res FROM ".self::TABLEPLACETYPES;
-		$result1 = $this->queryDB($SQL1);
+		$result1 = $this->query($SQL1);
 		if (!$result1) {
 			echo "Error querying placetypes table: ".$this->db->error;
 			return false;
@@ -418,7 +418,7 @@ class geoimport extends geoengine {
 		//do not insert records if table already populated
 		if ($result1->num_rows === 0){
 			$SQL = "INSERT INTO `".self::TABLEPLACETYPES."` VALUES (6,\"Street\",\"A street\",\"Street\"),(7,\"Town\",\"A populated settlement such as a city, town, village\",\"Town\"),(8,\"State\",\"One of the primary administrative areas within a country\",\"State\"),(9,\"County\",\"One of the secondary administrative areas within a country\",\"County\"),(10,\"Local Administrative Area\",\"One of the tertiary administrative areas within a country\",\"LocalAdmin\"),(11,\"Postal Code\",\"A partial or full postal code\",\"Zip\"),(12,\"Country\",\"One of the countries or dependent territories defined by the ISO 3166-1 standard\",\"Country\"),(13,\"Island\",\"An island\",\"Island\"),(14,\"Airport\",\"An airport\",\"Airport\"),(15,\"Drainage\",\"A water feature such as a river, canal, lake, bay, ocean\",\"Drainage\"),(16,\"Land Feature\",\"A land feature such as a park, mountain, beach\",\"LandFeature\"),(17,\"Miscellaneous\",\"A uncategorized place\",\"Miscellaneous\"),(18,\"Nationality\",\"An area affiliated with a nationality\",\"Nationality\"),(19,\"Supername\",\"An area covering multiple countries\",\"Supername\"),(20,\"Point of Interest\",\"A point of interest such as a school, hospital, tourist attraction\",\"POI\"),(21,\"Region\",\"An area covering portions of several countries\",\"Region\"),(22,\"Suburb\",\"A subdivision of a town such as a suburb or neighborhood\",\"Suburb\"),(23,\"Sports Team\",\"A sports team\",\"Sports Team\"),(24,\"Colloquial\",\"A place known by a colloquial name\",\"Colloquial\"),(25,\"Zone\",\"An area known within a specific context such as MSA or area code\",\"Zone\"),(26,\"Historical State\",\"A historical primary administrative area within a country\",\"HistoricalState\"),(27,\"Historical County\",\"A historical secondary administrative area within a country\",\"HistoricalCounty\"),(29,\"Continent\",\"One of the major land masses on the Earth\",\"Continent\"),(31,\"Time Zone\",\"An area defined by the Olson standard (tz database)\",\"Timezone\"),(32,\"Nearby Intersection\",\"An intersection of streets that is nearby to the streets in a query string\",\"Nearby Intersection\"),(33,\"Estate\",\"A housing development or subdivision known by name\",\"Estate\"),(35,\"Historical Town\",\"A historical populated settlement that is no longer known by its original name\",\"HistoricalTown\"),(36,\"Aggregate\",\"An aggregate place\",\"Aggregate\"),(37,\"Ocean\",\"One of the five major bodies of water on the Earth\",\"Ocean\"),(38,\"Sea\",\"An area of open water smaller than an ocean\",\"Sea\")";
-			$result = $this->queryDB($SQL);
+			$result = $this->query($SQL);
 			if (!$result) {
 				echo "Error populating placetypes table: ".$this->db->error;
 				return false;
@@ -435,10 +435,10 @@ class geoimport extends geoengine {
 	 */
 	public function tableExists($tableName){
 		$SQL = "DESC ".$tableName;
-		$result = $this->queryDB($SQL);
+		$result = $this->query($SQL);
 		if ($this->db->errno==1146){
 			$SQL2 = "SHOW TABLES";
-			$result2 = $this->queryDB($SQL2);
+			$result2 = $this->query($SQL2);
 			$logMsg = "Found the following tables:\n";
 			while ($row2 = $result2->fetch_array(MYSQL_NUM)) { 
 				$logMsg .=  "\t".$row2[0]."\n";
@@ -459,14 +459,14 @@ class geoimport extends geoengine {
 		$SQL1 = "SELECT DISTINCT parent FROM ".self::RAWPLACES." WHERE parent > 0 AND parent NOT IN (SELECT woeid FROM ".self::TABLECHILDREN.")";	//earth has no parent
 		$SQL2 = "SELECT woeid FROM " . self :: RAWPLACES . " WHERE parent="; 		//get children for each place
 		$SQL3 = "INSERT INTO " . self::TABLECHILDREN . "(woeid,children) VALUES "; 	//insert bambini for each
-		$result1 = $this->queryDB($SQL1);
+		$result1 = $this->query($SQL1);
 		echo " found ".$result1->num_rows." unprocessed places with children; processing...";
 		while ($row1 = $result1->fetch_array(MYSQLI_ASSOC)) {
-			$result2 = $this->queryDB($SQL2 . $row1['parent']);
+			$result2 = $this->query($SQL2 . $row1['parent']);
 			while ($row2 = $result2->fetch_array(MYSQLI_ASSOC)) {   				//create array of children for serializing
 				$tempArray[] = $row2['woeid'];
 			}
-			$result3 = $this->queryDB($SQL3 . "(" . $row1['parent'] . ",\"" . implode(",", $tempArray) . "\")"); //insert child record
+			$result3 = $this->query($SQL3 . "(" . $row1['parent'] . ",\"" . implode(",", $tempArray) . "\")"); //insert child record
 			unset($tempArray);
 		}
 		echo " complete\n";
@@ -483,7 +483,7 @@ class geoimport extends geoengine {
 		$SQL = "INSERT INTO " . self::TABLEPARENTS . " (woeid,parent_id)
 				SELECT woeid, parent 
 				FROM  " . self :: RAWPLACES;
-		if ($this->queryDB($SQL)) {
+		if ($this->query($SQL)) {
 			$this->enableKeys(self :: TABLEPARENTS);											
 			echo " complete\n";
 			return true;
@@ -501,15 +501,15 @@ class geoimport extends geoengine {
 		$SQL1 = "SELECT woeid FROM ".self :: TABLEPLACES;
 		$SQL2 = "SELECT neighbor FROM " . self::RAWADJACENCIES . " WHERE woeid="; //get adjacencies for once place at time
 		$SQL3 = "INSERT INTO " . self::TABLEADJACENCIES . "(woeid,adjacencies) VALUES "; //insert
-		$result1 = $this->queryDB($SQL1);
+		$result1 = $this->query($SQL1);
 		$this->disableKeys(self :: TABLEADJACENCIES);
 		while ($row1 = $result1->fetch_array(MYSQLI_ASSOC)) {
-			$result2 = $this->queryDB($SQL2 . $row1['woeid']);
+			$result2 = $this->query($SQL2 . $row1['woeid']);
 			if ($result2->num_rows > 0) {
 				while ($row2 = $result2->fetch_array(MYSQLI_ASSOC)) { //create array of neighbors for insertion
 					$tempArray[] = $row2['neighbor'];
 				}
-				$result3 = $this->queryDB($SQL3 . "(" . $row1['woeid'] . ",\"" . implode(",", $tempArray) . "\")"); //insert adjacent record
+				$result3 = $this->query($SQL3 . "(" . $row1['woeid'] . ",\"" . implode(",", $tempArray) . "\")"); //insert adjacent record
 				unset($tempArray);
 			}
 		}
@@ -547,7 +547,7 @@ class geoimport extends geoengine {
 		$SQL = "INSERT INTO " . self::TABLEPLACENAMES . "(woeid,pref,name,nametype)
 				SELECT woeid, 1, name, NULL
 				FROM " . self :: TABLEPLACES;
-		if ($this->queryDB($SQL)) {
+		if ($this->query($SQL)) {
 			return true;
 		} else {
 			return false;
@@ -562,7 +562,7 @@ class geoimport extends geoengine {
 		$SQL = "INSERT INTO " . self::TABLEPLACENAMES . "(woeid,pref,name,nametype,lang)
 			SELECT " . self :: RAWALIASES . ".woeid, 0, " . self :: RAWALIASES . ".name, " . self :: RAWALIASES . ".nametype,". self :: RAWALIASES . ".lang
 			FROM " . self :: RAWALIASES; 
-		if ($this->queryDB($SQL)) {
+		if ($this->query($SQL)) {
 			return true;
 		} else {
 			return false;
@@ -577,7 +577,7 @@ class geoimport extends geoengine {
 		$SQL = "UPDATE " . self :: TABLEPLACENAMES . "," . self :: TABLEPLACES . "
 				SET " . self :: TABLEPLACENAMES . ".placetype=" . self :: TABLEPLACES . ".placetype 
 				WHERE " . self :: TABLEPLACENAMES . ".woeid=" . self :: TABLEPLACES . ".woeid";
-		if ($this->queryDB($SQL)) {											
+		if ($this->query($SQL)) {											
 			return true;
 		} else {
 			return false;
@@ -591,7 +591,7 @@ class geoimport extends geoengine {
 	*/
 	protected function disableKeys($tableName) {
 		$SQL = "ALTER TABLE " . $tableName . " DISABLE KEYS";
-		return $this->queryDB($SQL);
+		return $this->query($SQL);
 	}
 
 	/**
@@ -601,7 +601,7 @@ class geoimport extends geoengine {
 	*/
 	protected function enableKeys($tableName) {
 		$SQL = "ALTER TABLE " . $tableName . " ENABLE KEYS";
-		return $this->queryDB($SQL);
+		return $this->query($SQL);
 	}
 
 	/**
@@ -616,7 +616,7 @@ class geoimport extends geoengine {
 				SELECT woeid, name, placetype, iso 
 				FROM  " . self :: RAWPLACES . " 
 				WHERE placetype != \"sport\" AND woeid NOT IN(SELECT woeid FROM ".self :: TABLEPLACES.")"; //sportsteams not included (because they're not f'ing places)
-		$result = $this->queryDB($SQL);
+		$result = $this->query($SQL);
 		if ($result) {
 			//rebuild keys
 			$this->enableKeys(self :: TABLEPLACES);
@@ -638,7 +638,7 @@ class geoimport extends geoengine {
 				INTO TABLE " . self :: RAWADJACENCIES . "
 				FIELDS TERMINATED BY '\t'  ENCLOSED BY '\"' 
 				IGNORE 1 LINES";
-		if ($this->queryDB($SQL)) {
+		if ($this->query($SQL)) {
 			echo " complete\n";
 			return true;
 		} else {
@@ -657,7 +657,7 @@ class geoimport extends geoengine {
 				INTO TABLE " . self :: RAWALIASES . "
 				FIELDS TERMINATED BY '\t'  ENCLOSED BY '\"'
 				IGNORE 1 LINES";
-		if ($this->queryDB($SQL)) {
+		if ($this->query($SQL)) {
 			echo " complete\n";
 			return true;
 		} else {
@@ -676,7 +676,7 @@ class geoimport extends geoengine {
 				INTO TABLE " . self :: RAWPLACES . "
 				FIELDS TERMINATED BY '\t'  ENCLOSED BY '\"'
 				IGNORE 1 LINES";
-		if ($this->queryDB($SQL)) {
+		if ($this->query($SQL)) {
 			echo " complete\n";
 			return true;
 		} else {
