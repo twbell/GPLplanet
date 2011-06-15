@@ -560,7 +560,7 @@ class geoengine {
 	public function escapeString($str) {
 		return $this->getDB()->escapeString($str);
 	} 
- 	
+ 
 	/**
 	* Caches woeid return for a placename/string query
 	* @param string q 
@@ -594,18 +594,6 @@ class geoengine {
 		} else {
 			return false;
 		}
-	}
-
-	/**
-	* Escapes strings for db insert
-	* @param string $str 
-	* @return string
-	*/
-	public function escapeString($str) {
-		if (!$this->db) {
-			$this->connectDB();
-		}
-		return $this->getDB()->real_escape_string($str);
 	}
 
 	/**
