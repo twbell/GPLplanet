@@ -58,10 +58,6 @@ class geoengine {
 	public function getGeoByAlpha2($alpha2){
 		$SQL = "SELECT woeid FROM " . self :: TABLECOUNTRIES . " WHERE alpha2=\"" . $alpha2 . "\"";	
 		$result = $this->query($SQL);
-		if (!$result) {
-			$this->logMsg(__METHOD__ . " error");
-			return false;
-		}
 		if ($result->num_rows === 0) {
 			return false;
 		}
@@ -77,10 +73,6 @@ class geoengine {
 	public function getGeoByAlpha3($alpha3){
 		$SQL = "SELECT woeid FROM " . self :: TABLECOUNTRIES . " WHERE alpha3=\"" . $alpha3 . "\"";	
 		$result = $this->query($SQL);
-		if (!$result) {
-			$this->logMsg(__METHOD__ . " error");
-			return false;
-		}
 		if ($result->num_rows === 0) {
 			return false;
 		}
@@ -98,10 +90,6 @@ class geoengine {
 		$q = $this->escapeString($q);
 		$SQL = "SELECT woeid FROM " . self :: TABLEPLACENAMES . " WHERE name=\"" . $q . "\"";
 		$result = $this->query($SQL);
-		if (!$result) {
-			$this->logMsg(__METHOD__ . " error searching on placename " . $q);
-			return false;
-		}
 		if ($result->num_rows === 0) {
 			return array ();
 		}
@@ -121,10 +109,6 @@ class geoengine {
 	public function getByTypeCountry($typeCode,$countryCode) {
 		$SQL = "SELECT woeid FROM " . self :: TABLEPLACES . " WHERE placetype=".$typeCode." AND country=\"" . $countryCode . "\"";
 		$result = $this->query($SQL);
-		if (!$result) {
-			$this->logMsg(__METHOD__ . " error searching on place type and name ");
-			return false;
-		}
 		if ($result->num_rows === 0) {
 			return array ();
 		}
@@ -171,10 +155,6 @@ class geoengine {
 		}
 		$SQL = "SELECT " . $select . " FROM " . $this->tPlaces . " WHERE woeid=" . $woeid;
 		$result = $this->query($SQL);
-		if (!$result) {
-			$this->logMsg(__METHOD__ . " Error");
-			return false;
-		}
 		$row = $result->fetch_array(MYSQLI_ASSOC);
 		return $row[$select];
 	}
@@ -186,10 +166,6 @@ class geoengine {
 	public function placeTypeLookup($placeTypeCode){
 		$SQL = "SELECT name FROM " . self::TABLEPLACETYPES . " WHERE id=" . $placeTypeCode;
 		$result = $this->query($SQL);
-		if (!$result) {
-			$this->logMsg(__METHOD__ . " Error");
-			return false;
-		}
 		if ($result->num_rows === 0){return false;}
 		$row = $result->fetch_array(MYSQLI_ASSOC);
 		return $row['name'];
@@ -336,16 +312,31 @@ class geoengine {
 	public function getGeo($woeid) {
 		$SQL = "SELECT * FROM " . self :: TABLEPLACES . " WHERE woeid=" . $woeid;
 		$result = $this->query($SQL);
-		if (!$result) {
-			$this->logMsg(__METHOD__ . " error on WOEID " . $woeid);
-			return false;
-		}
 		if ($result->num_rows === 0) {
 			return false;
 		}
 		$row = $result->fetch_array(MYSQLI_ASSOC);
 		require_once ('class.geo.php');
 		return new geo($row);
+	}
+
+	/**
+	 * Gets multiple gplplanet::geo object
+	 * @param array array of woeids
+	 * @return obj geo object
+	 */
+	public function getMultiGeo(array $woeid) {
+		$res = array();
+		$SQL = "SELECT * FROM " . self :: TABLEPLACES . " WHERE woeid IN (" . implode(",",$woeid).")";
+		$result = $this->query($SQL);
+		if ($result->num_rows === 0) {
+			return $res;
+		}
+		require_once ('class.geo.php');
+		while ($row = $result->fetch_array(MYSQLI_ASSOC)){
+			$res[] = new geo($row);
+		}
+		return $res;
 	}
 
 	/**
@@ -389,10 +380,6 @@ class geoengine {
 		$SQL = "SELECT * FROM " . self :: TABLEPLACES . " WHERE woeid IN (" . implode(",", $aWoeids) . ")";
 		unset ($aWoeids);
 		$result = $this->query($SQL);
-		if (!$result) {
-			$this->logMsg(__METHOD__ . " error");
-			return false;
-		}
 		if ($result->num_rows === 0) {
 			return array ();
 		}
@@ -412,10 +399,6 @@ class geoengine {
 	public function getAdjacencies($woeid) {
 		$SQL = "SELECT adjacencies FROM " . self :: TABLEADJACENCIES . " WHERE woeid=" . $woeid;
 		$result = $this->query($SQL);
-		if (!$result) {
-			$this->logMsg(__METHOD__ . " error on WOEID " . $woeid);
-			return false;
-		}
 		if ($result->num_rows === 0) {
 			return array ();
 		}
@@ -431,10 +414,6 @@ class geoengine {
 	public function getChildren($woeid) {
 		$SQL = "SELECT children FROM " . self :: TABLECHILDREN . " WHERE woeid=" . $woeid;
 		$result = $this->query($SQL);
-		if (!$result) {
-			$this->logMsg(__METHOD__ . " error on WOEID " . $woeid);
-			return false;
-		}
 		if ($result->num_rows === 0) {
 			return array ();
 		}
@@ -450,10 +429,6 @@ class geoengine {
 	public function getAncestors($woeid) {
 		$SQL = "SELECT ancestors FROM " . self :: TABLEANCESTORS . " WHERE woeid=" . $woeid;
 		$result = $this->query($SQL);
-		if (!$result) {
-			$this->logMsg(__METHOD__ . " error on WOEID " . $woeid);
-			return false;
-		}
 		if ($result->num_rows === 0) {
 			return array ();
 		}
@@ -469,10 +444,6 @@ class geoengine {
 	public function getParent($woeid) {
 		$SQL = "SELECT parent_id FROM " . self :: TABLEPARENTS . " WHERE woeid=" . $woeid;
 		$result = $this->query($SQL);
-		if (!$result) {
-			$this->logMsg(__METHOD__ . " Error on WOEID " . $woeid);
-			return false;
-		}
 		if ($result->num_rows === 0) {
 			return false;
 		}
@@ -491,10 +462,6 @@ class geoengine {
 		}
 		$SQL = "SELECT descendants FROM " . self :: TABLEDESCENDANTS . " WHERE woeid=" . $woeid;
 		$result = $this->query($SQL);
-		if (!$result) {
-			$this->logMsg(__METHOD__ . " error on WOEID " . $woeid);
-			return false;
-		}
 		if ($result->num_rows === 0 || $woeid === 1) { //no result / querying the earth
 			return array ();
 		}
@@ -563,7 +530,7 @@ class geoengine {
 	*/
 	
 	/**
-	 * Queries database
+	 * Queries database (wrapper)
 	 * @return resultset
 	 */
 	public function query($SQL){
@@ -586,7 +553,7 @@ class geoengine {
 	} 
 
 	/**
-	* Escapes strings for db insert
+	* Escapes strings for db insert (wrapper)
 	* @param string $str 
 	* @return string
 	*/
@@ -594,7 +561,6 @@ class geoengine {
 		return $this->getDB()->escapeString($str);
 	} 
  	
-
 	/**
 	* Caches woeid return for a placename/string query
 	* @param string q 
@@ -606,12 +572,11 @@ class geoengine {
 		$q = $this->escapeString($q);
 		$SQL = "INSERT LOW_PRIORITY INTO " . self :: TABLEDISAMBIGUATE . " (q,woeid,focus) VALUES ";
 		$SQL .= "(\"$q\",$woeid,$focus) ON DUPLICATE KEY UPDATE woeid=woeid"; //ignore in event dupe key is written
-		$result = $this->query($SQL);
-		if (!$result) {
-			$this->logMsg(__METHOD__ . " error writing disambiguate cache " . $woeid);
+		if ($this->query($SQL)){
+			return true;
+		} else {
 			return false;
 		}
-		return true;
 	}
 
 	/**
@@ -623,10 +588,6 @@ class geoengine {
 	protected function readDisambiguateCache($q, $focus) {
 		$SQL = "SELECT woeid FROM " . self :: TABLEDISAMBIGUATE . " WHERE q=\"" . $q . "\" AND focus=" . $focus;
 		$result = $this->query($SQL);
-		if (!$result) {
-			$this->logMsg(__METHOD__ . " error reading disambiguate cache for place " . $q);
-			return false;
-		}
 		if ($result->num_rows == 1) {
 			$row = $result->fetch_array(MYSQLI_ASSOC);
 			return $row['woeid'];
@@ -636,7 +597,7 @@ class geoengine {
 	}
 
 	/**
-	* Escapes strings for insert
+	* Escapes strings for db insert
 	* @param string $str 
 	* @return string
 	*/
@@ -646,8 +607,6 @@ class geoengine {
 		}
 		return $this->getDB()->real_escape_string($str);
 	}
-
-
 
 	/**
 	* Logs messages (very simple)
