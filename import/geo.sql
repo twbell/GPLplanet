@@ -14,6 +14,7 @@ CREATE TABLE IF NOT EXISTS `cache_disambiguate` (
   PRIMARY KEY (`q`,`focus`) USING BTREE,
   KEY `focus_idx` (`focus`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci COMMENT='Cached disambiguation queries from Geoplanet web service';
+
 --
 -- Create table `geo_adjacencies`
 --

@@ -76,7 +76,20 @@ class db {
 		return $result;
 	}	
 	
-
+	/**
+	* Multi Query database
+	* @param string SQL SQL statement
+	* @return mysql(i) result object
+	*/
+	public function multiQuery($SQL) {
+		$result = $this->db->multi_query($SQL);
+		if ($this->db->error) {
+			$errMsg = $this->db->error . " (" . $SQL . ")";
+			throw new Exception(__METHOD__." ".$errMsg);
+			return false;
+		}
+		return $result;
+	}	
 } 
  
 ?>

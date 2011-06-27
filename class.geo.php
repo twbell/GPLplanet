@@ -5,7 +5,7 @@
 * geo - Named place object, the instatiation of woeid
 * @package gplplanet
 * @author Tyler Bell tylerwbell[at]gmail[dot]com
-* @copyright 2009,2010 - Tyler Bell
+* @copyright 2009-2011 - Tyler Bell
 * @license GNU General Public License
 */
 
@@ -148,9 +148,17 @@ class geo {
 		if ($this->children) {
 			return $this->children;
 		}
-
 		$this->children = $this->getEngine()->getChildren($this->woeid);
 		return $this->children;
+	}
+
+	/**
+	* Is this a leaf node (no children)
+	* @param int woeid
+	* @return array
+	*/
+	public function isLeafNode(){
+		return $this->getEngine()->isLeafNode($this->woeid);
 	}
 
 	/**

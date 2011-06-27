@@ -81,6 +81,35 @@ class geoengine {
 	}
 
 	/**
+	* Gets all nodes without children
+	* @return array
+	*/
+	public function getLeafNodes(){
+		$SQL = "SELECT woeid from ".self::TABLEPLACES." WHERE woeid NOT IN (SELECT woeid FROM ".self::TABLECHILDREN.")";
+		$result = $this->query($SQL);
+		while ($row = $result->fetch_array(MYSQLI_ASSOC)){
+			$res[] = $row['woeid'];
+		}
+		return $res;
+	}
+
+	/**
+	* Is the woeid a leaf node (no children)
+	* @param int woeid
+	* @return array
+	*/
+	public function isLeafNode($woeid){
+		$SQL = "SELECT woeid from ".self::TABLECHILDREN." WHERE woeid=".$woeid;
+		$result = $this->query($SQL);
+		if ($result->num_rows === 0) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+
+	/**
 	* Gets places with corresponding placename (exact match) 
 	* Use only placenames ("Nortfield"), not contextual names ("Northfield, MN")
 	* @param string q
@@ -98,7 +127,6 @@ class geoengine {
 		}
 		return $aTemp;
 	}
-
 
 	/**
 	* Gets places a specific type in a specific country 
