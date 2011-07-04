@@ -116,7 +116,7 @@ TODO
 - Siblings data optimization (currently not cached)
 - BelongTo service integration
 - Name search JS code examples for as-you-type lookup
-- Experiment with SimpleDB
+- Experiment with SimpleDB (currently MySQL)
 - Reconsider how relationships (descendants etc) are cached.  Now just larger arrays in single field -- not elegant.
 
 

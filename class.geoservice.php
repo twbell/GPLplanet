@@ -6,7 +6,7 @@
  * @package gplplanet
  * @author Tyler Bell tylerwbell[at]gmail[dot]com
  * @copyright (C) 2009,2011 - Tyler Bell
- * @todo Authenticated YQL
+ * @todo Authenticated YQL integration
  * @license GNU General Public License
  */
 
