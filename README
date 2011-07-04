@@ -39,6 +39,8 @@ understand before implementing in production. If you are looking for a simple Ge
 Web-service-only wrapper, see Tyler Hall's http://github.com/tylerhall/php-geoplanet/. Also consider
 using Chris Heilmann's 'GeoPlanet Explorer' website for an easy, ad-hoc woeid and placename lookup: 
 http://isithackday.com/geoplanet-explorer/
+
+Lastly: a reminder that the geoplanet data dump does not contain coordinates, which must be obtained from the GeoPlanet web service directly.  However, gplplanet wraps the GeoPlanet web service transparently.
   
 GETTING STARTED
 ---------------------
@@ -60,7 +62,7 @@ $engine->reverseGeocode(0.151490,52.145329);    //reverse geocodes -- (uses web 
 $engine->getBbox(727232);                       //bounding box of Amsterdam -- (uses web service)
 $engine->filterByType($engine->getDescendants(23424977),7); //all towns in US
 $engine->getAdjacencies(2468964);               //all entities surrounding woeid 2468964 (Pasedena, CA)
-engine->getGeo(2468964);						//get an object representation of woeid 2468964		
+engine->getGeo(2468964);			//get an object representation of woeid 2468964		
 
 USE OF EXTERNAL WEB SERVICES
 ---------------------
@@ -74,8 +76,8 @@ Geo objects are lightweight entities that share a common geoengine singleton -- 
 the code (and processing power) lies. They are intended as handy encapsulations but are not required.  All methods 
 return WOEIDs as INT or arrays of INT, which can be instantiated as geo objects.  
 
-	$engine::getGeo(INT);					//instantiates woeid as geo object
-	$engine::getMultiGeo(ARRAY);			//instantiates array of woeids as array of geo object
+	$engine->getGeo(INT);				//instantiates woeid as geo object
+	$engine->getMultiGeo(ARRAY);			//instantiates array of woeids as array of geo object
 	
 Geo objects contain mostly identical methods using the same naming convention as the geoengine factory class:
 
