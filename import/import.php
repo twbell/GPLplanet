@@ -4,15 +4,19 @@
  * (0) 	Configure PHP:
  * 			- set php.ini memory_limit to 1.5GB for handling large import arrays (memory_limit = 1500M)
  * 		Configure MySQL:
- * 			- MySQL 'tmpdir' must have 50 GB HDD available space 
  * 			- MySQL max_allowed_packet = 50M (or greater)
  * (1) Configure database connection vars in config.ini
  * (2) Download geoplanet data from http://developer.yahoo.com/geo/geoplanet/data/
- * (3) Add file names to the file variables below
+ * (3) Add tsv file loations to the file variables below
  * (4) cd to this dir and run this script from the command line: "php import.php"
  * 
- * This thing takes a while to run (mainly building indicies and pre-caching relationships),  
- * so it will to pick-up where it left off, if interrupted .  Temp files are created in your system temp directory.
+ * Temp files are created in your system's (wait for it) temp directory, so ensure you have about 50GB 
+ * avilable to be safe.
+ * 
+ * The import script takes a while to run as it builds indicies and pre-caches relationships.  Nearly all 
+ * long-running scripts have been designed to pick-up where they left off, if interrupted .  Populating 
+ * Descendants can take three days on a lower-end laptop -- query "select count(woeid) FROM geo_descendants"
+ * to view progress that will not always be apparent on progress bar.
  * 
  * @package gplplanet
  * @author Tyler Bell tylerwbell[at]gmail[dot]com
@@ -33,15 +37,13 @@ require_once ('class.geoimport.php');
 $importEngine = new geoimport; 	//uses db name from config file. Override by assigning var $importEngine->dbName = your_new_database_name
 $importProgress = "import";		//table name for tracking import progress					
 
-/*
 //check files
 foreach ($files as $file){
 	if (!is_readable($file)){
-		echo "Cannot read file ".$file." Please set file location on lns 24ff in import.php\n";
+		echo "Cannot read file ".$file." Please set file location on lns 27ff in import.php\n";
 		exit;
 	}
 }
-*/
 
 echo "\nxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n";
 echo "Import Files Verified\n";

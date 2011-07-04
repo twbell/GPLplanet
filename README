@@ -21,25 +21,28 @@ http://developer.yahoo.com/geo/geoplanet/
 
 Yahoo makes GeoPlanet available as both a Web service and data download.  
 Due to call-per-day restrictions, latency concerns, or the need for offline use, 
-small businesses and startups are either unwilling or unable to create their core geographic 
+small businesses and startups may be either unwilling or unable to create their core geographic 
 platforms on Yahoo Web services.   This library uses a local version of 
 GeoPlanet to obtain similar functionality, in a local environment, allowing 
 developers easy access to GeoPlanet in a PHP class with access to Web services 
 where required.  In a nutshell:
 
-- Creates highly optimized (read: precached, not normalized) MySQL geoplanet database
+- Creates highly optimized (read: pre-cached, not normalized) MySQL geoplanet database
 - Imports GeoPlanet TSV
 - Provides PHP wrappers for getParents(), getChildren(), disambiguate() etc. methods
 - Wraps geocode(), reverseGeocode(), and getElevation() calls (YSQL Web Service only)
-- Gets and caches coordinate data for woeids (not supplied with data dump)
-- Provides sample Web service scripts for deployment examples SaaS environments
+- Gets and caches coordinate data for woeids (coordinates not supplied with data dump)
+- Provides sample Web service and commandline scripts
 
 These libraries are intended to make a local instance of GeoPlanet more accessible and easier to 
 understand before implementing in production. If you are looking for a simple GeoPlanet
-Web-service-only wrapper, see Tyler Hall's http://github.com/tylerhall/php-geoplanet/.
+Web-service-only wrapper, see Tyler Hall's http://github.com/tylerhall/php-geoplanet/. Also consider
+using Chris Heilmann's 'GeoPlanet Explorer' website for an easy, ad-hoc woeid and placename lookup: 
+http://isithackday.com/geoplanet-explorer/
   
 GETTING STARTED
 ---------------------
+Import the Geoplanet TSV files (or find a cheeky sqldump of the gplplanet tables)
 Require the geoengine class and get an instance thereof:
 
 require_once('class.geoengine.php');			
@@ -57,8 +60,9 @@ $engine->reverseGeocode(0.151490,52.145329);    //reverse geocodes -- (uses web 
 $engine->getBbox(727232);                       //bounding box of Amsterdam -- (uses web service)
 $engine->filterByType($engine->getDescendants(23424977),7); //all towns in US
 $engine->getAdjacencies(2468964);               //all entities surrounding woeid 2468964 (Pasedena, CA)
+engine->getGeo(2468964);						//get an object representation of woeid 2468964		
 
-USE OF WEB SERVICE
+USE OF EXTERNAL WEB SERVICES
 ---------------------
 Some methods call Yahoo and other web services via YQL.  The results of these calls are cached so (for example) if you 
 request the Bounding box of an entity, the webservice will not be called if request a second time.  The general idea is 
@@ -70,8 +74,8 @@ Geo objects are lightweight entities that share a common geoengine singleton -- 
 the code (and processing power) lies. They are intended as handy encapsulations but are not required.  All methods 
 return WOEIDs as INT or arrays of INT, which can be instantiated as geo objects.  
 
-	$engine->getGeo(INT);					//instantiates woeid as geo object
-	$engine->getMultiGeo(ARRAY);			//instantiates array of woeids as array of geo object
+	$engine::getGeo(INT);					//instantiates woeid as geo object
+	$engine::getMultiGeo(ARRAY);			//instantiates array of woeids as array of geo object
 	
 Geo objects contain mostly identical methods using the same naming convention as the geoengine factory class:
 
@@ -81,6 +85,15 @@ serves the same purpose as:
 	
 	$geo = $engine->getGeo(31278);	
 	$geo->getParent();
+	
+and is equally efficient.
+
+COMMAND LINE SCRIPTS
+-------------------------
+Example command line scripts live in the scripts folder:
+
+	php children.php 12345	//returns children of woeid 12345 as JSON array
+	php get.php 12345		//returns JSON hash representation of woeid 12345
 
 FILE OVERVIEW
 -------------------------
@@ -93,8 +106,16 @@ import/import.php           Procedural script for importing tsv data
 import/geo.sql              SQL script for creating database
 config.ini                  Configurations incl. database connection
 webservice/disambiguate.php Example script for getting most probably place of given name
-webservice/navigate.php     Example script for obtaining parents, children, etc. from geoplanet
+webservice/children.php     Example script for children from geoplanet
 webservice/reversegeocode   Example script for reverse geocoding
+script/children.php			Example command line script for getting children of woeid
+script/get.php				Example command line script for instantiating woeid
+
+REQUIRED LIBS
+-------------------------
+- PHP 5 with MySQLi
+- MySQL
+Not tested with version 4 of either one.
 
 IMPORTING GEOPLANET DATA
 -------------------------
@@ -106,10 +127,8 @@ IMPORTING GEOPLANET DATA
 Import Notes:
 - Import status will be echoed
 - Script takes several hours or even days, depending on processor
-- 50GB HD space required for MySQL temporary tables during import process
-- php.ini memory_limit +1GB
-- MySQL max_allowed_packet required 20MB
-- Largest array produced thereafter at runtime is just under 18MB (UK descendants)
+- Needs disk and memory resources; see import.php for requirements
+- Largest array produced at runtime (after import) is just under 18MB (UK descendants)
 
 TODO
 --------------------------
