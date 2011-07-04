@@ -20,17 +20,17 @@ unambiguously geotag, geotarget, and geolocate data across the Web"
 http://developer.yahoo.com/geo/geoplanet/
 
 Yahoo makes GeoPlanet available as both a Web service and data download.  
-Due to call-per-day restrictions or latency concerns, small businesses and 
-startups are either unwilling or unable to create their core geographic 
+Due to call-per-day restrictions, latency concerns, or the need for offline use, 
+small businesses and startups are either unwilling or unable to create their core geographic 
 platforms on Yahoo Web services.   This library uses a local version of 
 GeoPlanet to obtain similar functionality, in a local environment, allowing 
 developers easy access to GeoPlanet in a PHP class with access to Web services 
 where required.  In a nutshell:
 
-- Creates highly optimized (read: not normalized) MySQL geoplanet database
+- Creates highly optimized (read: precached, not normalized) MySQL geoplanet database
 - Imports GeoPlanet TSV
 - Provides PHP wrappers for getParents(), getChildren(), disambiguate() etc. methods
-- Wraps geocode(), reverseGeocode(), and getElevation() calls (Web Service only)
+- Wraps geocode(), reverseGeocode(), and getElevation() calls (YSQL Web Service only)
 - Gets and caches coordinate data for woeids (not supplied with data dump)
 - Provides sample Web service scripts for deployment examples SaaS environments
 

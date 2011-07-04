@@ -19,6 +19,7 @@ class geoimport extends geoengine {
 	const RAWALIASES = "raw_aliases";
 	const RAWADJACENCIES = "raw_adjacencies";
 	const TEMPTABLEDESC = "temp_descendants";
+	
 
 	//=============== METHODS ==================
 
@@ -229,7 +230,7 @@ class geoimport extends geoengine {
 	*/
 	protected function insertDescendants($woeid, $aDescendants) {
 		if (empty ($aDescendants)) {
-			echo "woeid " . $woeid . " attempted write with no descendants\n";
+			//echo "woeid " . $woeid . " attempted write with no descendants\n";
 			return false;
 		}
 		$SQL = "INSERT INTO " . self :: TABLEDESCENDANTS . " (woeid, descendants) VALUES (" . $woeid . ",\"" . implode(",", $aDescendants) . "\") ON DUPLICATE KEY UPDATE woeid=woeid";
@@ -249,54 +250,61 @@ class geoimport extends geoengine {
 	* @return array
 	*/
 	public function getDescendants($woeid) {
+		$delineator = "\n"; //delineates ids in file
 		//first check to see whether this has been computed and cached already; if so, use it
 		if ($desc = parent :: getDescendants($woeid)) {
 			return $desc;
 		}
-		//create temp table if not exist to accommodate big iterative queries and not kill memory
-		if (!$this->createTempDescTable()) {
-			$this->logMsg(__METHOD__ . "error creating temporary table");
-			return false;
-		}
 		//get children of woeid	
 		$aChildren = $this->getChildren($woeid);	
+		//create temp file to hold descendants
+		$tempFile = sys_get_temp_dir()."/gplp-desc-".$woeid.".tmp";
+		if (!$fp = fopen($tempFile, 'w')){//open file for writing
+			echo "Error writing to temp file ".$tempFile."; exiting\n";
+			exit;
+		}
 		//iterate and recurse
 		foreach ($aChildren as $child) {
 			if ($child) {
 				//merge child with its descendents						
 				$tempDesc = $this->getDescendants($child);
 				$tempDesc[] = $child;
-				//add child and its descendants into temp table as interim step (avoids working with massive, mem-hogging arrays)
-				$SQL1 = "INSERT INTO " . self :: TEMPTABLEDESC . " (woeid,descendant) VALUES ";
-				foreach ($tempDesc as $desc) {
-					$SQL1Array[] = "(" . $woeid . "," . $desc . ")";
-				}
-				$SQL1 .= implode(",", $SQL1Array);
-				$result1 = $this->query($SQL1);
-				if (!$result1) {
-					$this->logMsg(__METHOD__ . "error inserting descendants into temp table on woeid " . $woeid);
-					return false;
-				}
+				//write descendants to temp file
+				fwrite($fp, implode($delineator,$tempDesc));
+				unset($tempDesc);
 			}
 		}
-		//all descendants are now in a big, vertical temp table; extract, write, delete from temp table, and return
-		$SQL2 = "SELECT DISTINCT descendant FROM " . self :: TEMPTABLEDESC . " WHERE woeid=" . $woeid;
-		$result2 = $this->query($SQL2);
-		if (!$result2) {
-			$this->logMsg(__METHOD__ . "error obtaining descendants from temp table for woeid " . $woeid);
-			return false;
+		//close file
+		fclose($fp);
+		unset($fp);
+		//get file contents
+		$tempArray = file_get_contents($tempFile);
+		if ($tempArray === false){
+			echo "Failed reading ".$tempFile."; exiting.\n";
+			exit;
+		};
+		$tempArray = explode($delineator,$tempArray);
+		$tempArray = array_filter($tempArray); //remove empty items
+		$tempArray = array_unique($tempArray); //double-check that we do not have dupes in the array
+		
+		//return if empty (should never get here)
+		if (count($tempArray) === 0 || empty($tempArray)){
+			return array();
 		}
-		if ($result2->num_rows === 0) {
-			return array ();
-		}
-		//cache descendant (write to table)
-		while ($row2 = $result2->fetch_array(MYSQLI_ASSOC)) { //create array of children for serializing
-			$tempArray[] = $row2['descendant'];
-		}
+		
+		//insert descendants into descendants table
 		$this->insertDescendants($woeid, $tempArray);
+		
+		//remove file
+		unlink($tempFile);
+		
+		/*
 		//delete records from temp table
 		$SQL3 = "DELETE FROM " . self :: TEMPTABLEDESC . " WHERE woeid=" . $woeid;
 		$result3 = $this->query($SQL3);
+		*/
+		
+		
 		//return
 		return $tempArray;
 	}

@@ -3,7 +3,7 @@
 
 /**
  * Web Service Wrapper for Placename disambiguation (demonstration)
- * Add placename to 'q'parameters (default format is json; use 'format=serialize for php); use 'focus' parameter to bias results
+ * Add placename to 'q'parameters (default format is json; use 'format=serialized for php); use 'focus' parameter to bias results
  * @example http://example.com/gplplanet/webservice/disambiguate.php?q="soma, san francisco"
  * @package gplplanet
  * @author Tyler Bell tylerwbell[at]gmail[dot]com
@@ -25,9 +25,8 @@ if ($_REQUEST['q']) {
 //Format, return
 if ($_REQUEST['format'] == "serialized") {
 	$res = serialize($res);
-	print_r($res);
 } else {
 	$res = json_encode($res);
-	print_r($res);
 }
+echo $res."\n";
 ?>

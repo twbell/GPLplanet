@@ -2,7 +2,7 @@
 
 
 /**
-* geo - Named place object, the instatiation of woeid
+* geo - Named place object, the instatiation of a woeid
 * @package gplplanet
 * @author Tyler Bell tylerwbell[at]gmail[dot]com
 * @copyright 2009-2011 - Tyler Bell
@@ -37,26 +37,74 @@ class geo {
 	* @param obj geo Geo object
 	* @return obj Place Object
 	*/
-	function __construct($row) {
-		$this->woeid = $row['woeid'];
+	function __construct($row,$fetch=false) {
+		$this->woeid = (int) $row['woeid'];
 		$this->name = $row['name'];
 		$this->contextName = $row['contextname'];
 		$this->placeTypeName = $row['placetypename'];
-		$this->placeType = $row['placetype'];
+		$this->placeType = (int) $row['placetype'];
 		$this->country = $row['country'];
-		$this->bBox['ne_lat'] = $row['bbox_ne_lat'];
-		$this->bBox['ne_lon'] = $row['bbox_ne_lon'];
-		$this->bBox['sw_lat'] = $row['bbox_sw_lat'];
-		$this->bBox['sw_lon'] = $row['bbox_sw_lon'];
-		$this->centroid['lon'] = $row['centroid_lon'];
-		$this->centroid['lat'] = $row['centroid_lat'];
+		//fetch coords from webservice on instantiation if not exist
+		if ($fetch && is_null($row['centroid_lon'])){
+			if (!$serviceGeo = $this->getEngine()->getAndRefreshCoords($this->woeid)){ //updates database with coords from web service
+				return false;
+			}
+			$this->updateInstanceCoords($serviceGeo); //update class properties with new coords
+		} else {
+			//null if no extant coords, cast as float otherwise
+			if (is_null($this->centroid['lon']) && is_null($row['bbox_ne_lon'])){
+				$this->bBox['ne_lat'] = null;
+				$this->bBox['ne_lon'] = null;
+				$this->bBox['sw_lat'] = null;
+				$this->bBox['sw_lon'] = null;
+				$this->centroid['lon'] = null;
+				$this->centroid['lat'] = null;
+			} else {
+				$this->bBox['ne_lat'] = (float) $row['bbox_ne_lat'];
+				$this->bBox['ne_lon'] = (float) $row['bbox_ne_lon'];
+				$this->bBox['sw_lat'] = (float) $row['bbox_sw_lat'];
+				$this->bBox['sw_lon'] = (float) $row['bbox_sw_lon'];
+				$this->centroid['lon'] = (float) $row['centroid_lon'];
+				$this->centroid['lat'] = (float) $row['centroid_lat'];			
+			}
+		}
 	}
+
+	/** 
+	 * Get clean representation (not really an instance) for JSON representation and similar
+	 * @param bool fetch get coordinates from web service if not exist
+	* @return array
+	*/
+	public function getCleanInstance($fetch=false){
+		$geo = array();
+		$geo['woeid'] = $this->woeid;
+		$geo['name'] = $this->name;
+		$geo['placetypename'] = $this->placeTypeName;
+		$geo['placetype'] = $this->placeType;
+		$geo['aliases'] = $this->getAliases();
+		//populate coords if not exist
+		if ($fetch && is_null($this->centroid['lon'])){
+			if (!$serviceGeo = $this->getEngine()->getAndRefreshCoords($this->woeid)){ //updates database with coords from web service
+				return false;
+			}
+			$this->updateInstanceCoords($serviceGeo); //update class properties with new coords
+		}
+		$geo['bbox']['ne_lat'] = $this->bBox['ne_lat'];
+		$geo['bbox']['ne_lon'] = $this->bBox['ne_lon'];
+		$geo['bbox']['sw_lat'] = $this->bBox['sw_lat'];
+		$geo['bbox']['sw_lon'] = $this->bBox['sw_lon']; 
+		$geo['centroid']['lon'] = $this->centroid['lon'];
+		$geo['centroid']['lat'] = $this->centroid['lat'];
+		
+		return $geo;
+	}
+
 
 	/** Get Bounding Box
 	* @return array
 	*/
 	public function getBbox() {
-		if (isset ($this->bBox['sw_lon'])) {
+		if (!is_null($this->bBox['sw_lon'])) {
 			return $this->bBox;
 		} else {
 			$geo = $this->getEngine()->getAndRefreshCoords($this->woeid); //updates database with coords from web service
@@ -72,7 +120,7 @@ class geo {
 	* @return array
 	*/
 	public function getCentroid() {
-		if (isset ($this->centroid['lon'])) {
+		if (!is_null($this->centroid['lon'])) {
 			return $this->centroid;
 		} else {
 			$geo = $this->getEngine()->getAndRefreshCoords($this->woeid); //updates database with coords from web service
@@ -93,12 +141,12 @@ class geo {
 		$bBox = $geo->getBbox();
 		unset ($geo);
 		//assign coordinates to this instance of object
-		$this->centroid['lon'] = $centroid['centroid_lon'];
-		$this->centroid['lat'] = $centroid['centroid_lat'];
-		$this->bBox['ne_lat'] = $bBox['bbox_ne_lat'];
-		$this->bBox['ne_lon'] = $bBox['bbox_ne_lon'];
-		$this->bBox['sw_lat'] = $bBox['bbox_sw_lat'];
-		$this->bBox['sw_lon'] = $bBox['bbox_sw_lon'];
+		$this->centroid['lon'] = $centroid['lon'];
+		$this->centroid['lat'] = $centroid['lat'];
+		$this->bBox['ne_lat'] = $bBox['ne_lat'];
+		$this->bBox['ne_lon'] = $bBox['ne_lon'];
+		$this->bBox['sw_lat'] = $bBox['sw_lat'];
+		$this->bBox['sw_lon'] = $bBox['sw_lon'];
 		return true;
 	}
 

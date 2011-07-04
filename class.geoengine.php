@@ -181,10 +181,30 @@ class geoengine {
 		} else {
 			$select = "placetype";
 		}
-		$SQL = "SELECT " . $select . " FROM " . $this->tPlaces . " WHERE woeid=" . $woeid;
+		$SQL = "SELECT " . $select . " FROM " . self::TABLEPLACES . " WHERE woeid=" . $woeid;
 		$result = $this->query($SQL);
 		$row = $result->fetch_array(MYSQLI_ASSOC);
 		return $row[$select];
+	}
+
+	/** Gets alternate names for places
+	 * @param int woeid
+	 * @return array
+	 */
+	public function getAliases($woeid){
+		$SQL = "SELECT name, nametype, pref, lang FROM " . self::TABLEPLACENAMES . " WHERE woeid=" . $woeid." AND pref != 1";
+		$result = $this->query($SQL);
+		$res = array();
+		while ($row = $result->fetch_array(MYSQLI_ASSOC)){
+			$temp = array(
+				'name' => $row['name'],
+				'lang' => $row['lang'],
+				'pref' => (bool) $row['pref'],
+				'nametype' => (int) $row['nametype']
+			);
+			$res[$row['name']] = $temp;
+		}
+		return $res;
 	}
 
 	/** Gets Placetype string (name) from placetype code
@@ -335,9 +355,10 @@ class geoengine {
 	/**
 	 * Gets gplplanet::geo object
 	 * @param int woeid woeid
+	 * @param bool fetch Fetch coords from webservice if not extant locally
 	 * @return obj geo object
 	 */
-	public function getGeo($woeid) {
+	public function getGeo($woeid, $fetch=false) {
 		$SQL = "SELECT * FROM " . self :: TABLEPLACES . " WHERE woeid=" . $woeid;
 		$result = $this->query($SQL);
 		if ($result->num_rows === 0) {
@@ -345,7 +366,7 @@ class geoengine {
 		}
 		$row = $result->fetch_array(MYSQLI_ASSOC);
 		require_once ('class.geo.php');
-		return new geo($row);
+		return new geo($row,$fetch);
 	}
 
 	/**

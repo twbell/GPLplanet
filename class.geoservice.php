@@ -57,7 +57,7 @@ class geoservice {
 			$query = $this->getEngine()->escapeString(serialize($query));
 			$response = $this->getEngine()->escapeString(serialize($response));
 			$SQL = "INSERT INTO ".self::TABLEGEOCODECACHE." (md5,query,response) VALUES (\"".$md5."\",\"".$query."\",\"".$response."\")";
-			$res = $this->getEngine()->queryDB($SQL);
+			$res = $this->getEngine()->query($SQL);
 			if (!$res) {
 				$this->logMsg(__METHOD__." failed");
 				return false;
@@ -75,7 +75,7 @@ class geoservice {
 		if ($this->cache){		
 			$md5 = md5($query);
 			$SQL = "SELECT response FROM ".self::TABLEGEOCODECACHE." WHERE md5=\"".$md5."\"";
-			$res = $this->getEngine()->queryDB($SQL);
+			$res = $this->getEngine()->query($SQL);
 			if (!$res) {
 				$this->logMsg(__METHOD__." failed");
 				return false;

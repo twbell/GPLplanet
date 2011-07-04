@@ -2,7 +2,7 @@
 /**
  * Instructions:
  * (0) 	Configure PHP:
- * 			- set php.ini memory_limit to 1GB for handling large import arrays (memory_limit = 1500M)
+ * 			- set php.ini memory_limit to 1.5GB for handling large import arrays (memory_limit = 1500M)
  * 		Configure MySQL:
  * 			- MySQL 'tmpdir' must have 50 GB HDD available space 
  * 			- MySQL max_allowed_packet = 50M (or greater)
@@ -11,8 +11,8 @@
  * (3) Add file names to the file variables below
  * (4) cd to this dir and run this script from the command line: "php import.php"
  * 
- * This thing takes a while to run (mainly building indicies and pre-caching relationship,  
- * so it will to pick-up where it left off, if interrupted 
+ * This thing takes a while to run (mainly building indicies and pre-caching relationships),  
+ * so it will to pick-up where it left off, if interrupted .  Temp files are created in your system temp directory.
  * 
  * @package gplplanet
  * @author Tyler Bell tylerwbell[at]gmail[dot]com
@@ -32,13 +32,17 @@ error_reporting(E_ALL); 		//runtime error reporting level
 require_once ('class.geoimport.php');
 $importEngine = new geoimport; 	//uses db name from config file. Override by assigning var $importEngine->dbName = your_new_database_name
 $importProgress = "import";		//table name for tracking import progress					
+
+/*
 //check files
 foreach ($files as $file){
 	if (!is_readable($file)){
-		echo "Cannot read file ".$file;
+		echo "Cannot read file ".$file." Please set file location on lns 24ff in import.php\n";
 		exit;
 	}
 }
+*/
+
 echo "\nxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n";
 echo "Import Files Verified\n";
 //create database
