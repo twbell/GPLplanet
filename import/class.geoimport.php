@@ -121,6 +121,14 @@ class geoimport extends geoengine {
 		return $nodes;
 	}
 
+
+	protected function countDescendants(){
+		$SQL = "SELECT COUNT(woeid) AS res FROM geo_descendants";
+		$result = $this->query($SQL);
+		$row = $result->fetch_array(MYSQLI_ASSOC);
+		return $row['res'];
+	}
+
 	/**
 	* Populate Descendants
 	* This process is slightly unusual in that inserts occur in the get() rather than populate() method. 
@@ -128,37 +136,22 @@ class geoimport extends geoengine {
 	* @return Bool
 	*/
 	public function populateDescendants() {
-		echo "Populating descendants by type... (takes a while, several iterations) \n";
+		echo "Populating descendants by type... (takes a while) \n";
 		flush();
-		/*
-		//build array from ground up
-		$res = $this->getCombinedParents($this->getLeafNodes()); 	//get penultimate generation
-		$nodes = array();
-		while (!empty($res)){
-			$nodes = array_merge($nodes,$res);
-			$res = $this->getCombinedParents($res);
-			$nodes = array_unique($nodes);
-		}	//now have array of all entities built from bottom up
-		//get those entities already processed
-		$SQL = "SELECT woeid FROM " . self :: TABLEDESCENDANTS;
-		$result = $this->query($SQL);
-		while ($row = $result->fetch_array(MYSQLI_ASSOC)) {
-			$done[] = $row['woeid'];
-		}
-		$nodes = array_diff($nodes,$done);
-		unset($done);
-		//iterate
-		$i=0;
-		$nodeCount = count($nodes);
-		foreach ($nodes as $key=>$node) {
-			$this->show_status($i, $nodeCount); //status bar
-			$this->getDescendants($node); //this calculates _and_ writes to table
-			unset($nodes[$key]); 	
-			$i++;
-		}
-		*/
 		//iterate by placetype, smallest first, to optimize memory use.
 		$placeTypeOrder = array (20,6,11,15,16,17,22,32,33,3,37,38,14,13,7,35,10,24,25,9,27,8,26,12,19,31,18,21,29,36);
+		
+		//get total count for status reporting
+		$SQL0 = "SELECT COUNT(woeid) AS res FROM " . self :: TABLEPLACES;
+		$SQL0 .= " WHERE placetype IN (" . implode(",",$placeTypeOrder) . ") AND woeid != 1"; //filter by type and do not need earth
+		$SQL0 .= " AND woeid IN (SELECT parent from " . self :: RAWPLACES . ")"; //parents only
+		$result0 = $this->query($SQL0);
+		$row = $result0->fetch_array(MYSQLI_ASSOC);
+		$total = $row['res'];
+		unset($result0);
+		unset($row);
+		
+		//select and iterate through each woeid
 		foreach ($placeTypeOrder as $placeType) {
 			$SQL1 = "SELECT woeid FROM " . self :: TABLEPLACES;
 			$SQL1 .= " WHERE placetype =" . $placeType . " AND woeid != 1"; //filter by type and do not need earth
@@ -167,17 +160,13 @@ class geoimport extends geoengine {
 			$result1 = $this->query($SQL1);
 			$rowCount = $result1->num_rows;
 			if ($rowCount > 0) {
-				//flush();
-				//echo "\t" . $rowCount . " " . $this->placeTypeLookup($placeType) . "s unprocessed; processing... ";
-				//flush();
-				$i=0;
 				while ($row1 = $result1->fetch_array(MYSQLI_ASSOC)) {
-					$this->show_status($i, $result1->num_rows); //status bar
+					$this->show_status($this->countDescendants(), $total); //update status bar
+					flush();
 					//double-check that this woeid has not been calculated
 					if (!$this->descAreCalc($row1['woeid'])){
 						$this->getDescendants($row1['woeid']); //this generates _and_ caches 	
 					}
-					$i++;
 				}
 			}
 		}
