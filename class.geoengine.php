@@ -416,6 +416,24 @@ class geoengine {
 	}
 
 	/**
+	* Get _all_ entities of a single placetype (from a specific country optionally)
+	* @param int type placetype code
+	* @param string country alpha-2 country code
+	* @return array
+	*/
+	public function getByType($type, $country=null) {
+		$SQL = "SELECT woeid FROM " . self :: TABLEPLACES . " WHERE placetype = ".$type;
+		if ($country){
+			$SQL .= " AND country=\"".$country."\"";
+		}
+		$result = $this->query($SQL);
+		while ($row = $result->fetch_array(MYSQLI_ASSOC)) {
+			$aTemp[] = $row['woeid'];
+		}
+		return $aTemp;		
+	}		
+
+	/**
 	 * Converts array of WOEIDs to array of geo objects
 	 * @param array $aWoeids array of woeids
 	 * @return array geo objects
