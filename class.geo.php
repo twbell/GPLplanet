@@ -203,7 +203,7 @@ class geo {
 	}
 
 	/** Get type of this place
-	* @param Bool nameType return string label instead of place code
+	* @param Bool nameType string label instead of place code
 	* @return mixed interger or string placetype as requested
 	*/
 	public function getPlaceType($nameType = false) {

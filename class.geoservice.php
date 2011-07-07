@@ -5,7 +5,7 @@
  * geoservice - wraps geo web services. Use as standalone or more powerfully with gplplanet::geoengine
  * @package gplplanet
  * @author Tyler Bell tylerwbell[at]gmail[dot]com
- * @copyright (C) 2009,2011 - Tyler Bell
+ * @copyright (C) 2009-2011 - Tyler Bell
  * @todo Authenticated YQL integration
  * @license GNU General Public License
  */
@@ -21,7 +21,7 @@ class geoservice {
 	
 	//web service timings
 	protected $lastQuery; //timestamp of last web query, used to control calls-per-second 	 
- 	protected $webServiceWait = 500000;  //webservice wait between calls in microseconds (0 = no wait)
+ 	protected $webServiceWait = 750000;  //webservice wait between calls in microseconds (0 = no wait)
 
 	//table definitions
 	const TABLEGEOCODECACHE = "cache_geocode";  
