@@ -177,6 +177,24 @@ class geo {
 		}
 	}
 
+	/**
+	 * Gets longitude
+	 * @return real
+	 */
+	public function getLon(){
+		$coords = $this->getCentroid();
+		return $coords['lon'];
+	}
+
+	/**
+	 * Gets latitude
+	 * @return real
+	 */
+	public function getLon(){
+		$coords = $this->getCentroid();
+		return $coords['lat'];
+	}
+
 	/** Get type of this place
 	* @param Bool nameType return string label instead of place code
 	* @return mixed interger or string placetype as requested
