@@ -1,10 +1,3 @@
-/**
- * @package gplplanet
- * @author Tyler Bell tylerwbell[at]gmail[dot]com
- * @copyright (C) 2009-2011 - Tyler Bell
- * @license GNU General Public License
- */
-
 #GPLPlanet
 
 ##INTRODUCTION
@@ -14,7 +7,7 @@ GeoPlanet(tm) in production.
 "Yahoo! GeoPlanet is a resource for managing all geo-permanent named places 
 on Earth. It provides the geographic developer community with the vocabulary 
 and grammar to describe the world's geography in an unequivocal, permanent, 
-\and language-neutral manner. Developers can geo-enable their applications 
+and language-neutral manner. Developers can geo-enable their applications 
 by using GeoPlanet to traverse the global spatial hierarchy, identify the 
 geography relevant to their users and their businesses, and in turn, 
 unambiguously geotag, geotarget, and geolocate data across the Web" 
@@ -46,10 +39,12 @@ Lastly: a reminder that the geoplanet data dump does not contain coordinates, wh
 ##GETTING STARTED
 Import the Geoplanet TSV files (or find a cheeky sqldump of the gplplanet tables)
 Require the geoengine class and get an instance thereof:
+
 ``` php
 require_once('class.geoengine.php');			
 $engine = geoengine::getInstance();             //geoengine is a factory singleton
 ```
+
 ## METHOD EXAMPLES
 ``` php
 $engine->disambiguate("springfield");           //the most likely 'Springfield'
@@ -85,10 +80,12 @@ Geo objects contain mostly identical methods using the same naming convention as
 	$engine->getParent(31278);
 ```	
 serves the same purpose as:
+
 ``` php	
 	$geo = $engine->getGeo(31278);	
 	$geo->getParent();
 ```	
+
 and is equally efficient.
 
 ##COMMAND LINE SCRIPTS
@@ -96,39 +93,40 @@ Example command line scripts live in the scripts folder:
 
 ```bash
 	php children.php 12345	//returns children of woeid 12345 as JSON array
-	php get.php 12345		//returns JSON hash representation of woeid 12345
+	php get.php 12345	//returns JSON hash representation of woeid 12345
 ```
 
 ##DIR OVERVIEW
-* import					Scripts, class for importing the geoplanet tsv files
-** import/class.import.php  Methods for tsv data import
-** import/import.php		Procedural script for importing tsv data
-** import/geo.sql			SQL script for creating database
-* scripts					Command line examples
-** script/children.php		Getting children of woeid
-** script/get.php			Instantiating woeid
-** (and others...)
-* webservice				Webservice examples
-** webservice/disambiguate.php Example script for getting most probably place of given name
-** webservice/children.php     Example script for children from geoplanet
-** webservice/reversegeocode   Example script for reverse geocoding
-** (and others...)
-* class.geoengine.php         Core methods and factory class; instantiate as singleton
-* class.geoservice.php        Methods wrapping YQL calls; instantiated as singleton, when required, by geoengine
-* class.geo.php               Geo object representing named-place; instantiated as required by geoengine
-* class.db.php               	Database object and methods (dead simple)
-* config.ini                  Configurations incl. database connection
+* import					*Scripts, class for importing the geoplanet tsv files*
+    * import/class.import.php  *Methods for tsv data import*
+    * import/import.php		*Procedural script for importing tsv data*
+    * import/geo.sql			*SQL script for creating database*
+* scripts					*Command line examples*
+    * script/children.php		*Getting children of woeid*
+    * script/get.php			*Instantiating woeid*
+    * (and others...)
+* webservice				*Webservice examples*
+    * webservice/disambiguate.php *Get most probably place of given name*
+    * webservice/children.php     *Get children of woeid*
+    * webservice/reversegeocode   *Reverse geocoding*
+    * (and others...)
+* class.geoengine.php         *Core methods and factory class; instantiate as singleton*
+* class.geoservice.php        *Methods wrapping YQL calls; instantiated as singleton, when required, by geoengine*
+* class.geo.php               *Geo object representing named-place; instantiated as required by geoengine*
+* class.db.php               	*Database object and methods*
+* config.ini                  *Configurations incl. database connection*
 
 ##REQUIRED LIBS
 * PHP 5 with MySQLi
 * MySQL
+
 Not tested with version 4 of either one.
 
 ##IMPORTING GEOPLANET DATA
-(1) Add database vars to config.ini
-(2) Download geoplanet data from http://developer.yahoo.com/geo/geoplanet/data/
-(3) Assign tsv filenames to the variables in import.php
-(4) Run import.php from the command line (e.g. "php import.php")
+1. Add database vars to config.ini
+2. Download geoplanet data from http://developer.yahoo.com/geo/geoplanet/data/
+3. Assign tsv filenames to the variables in import.php
+4. Run import.php from the command line (e.g. "php import.php")
 
 ###Import Notes:
 * See more detailed notes in import.php
@@ -144,4 +142,12 @@ Not tested with version 4 of either one.
 * Experiment with SimpleDB (currently MySQL)
 * Reconsider how relationships (descendants etc) are cached.  Now just larger arrays in single field -- not elegant.
 
-
+##SOURCE
+```php
+/**
+ * @package gplplanet
+ * @author Tyler Bell tylerwbell[at]gmail[dot]com
+ * @copyright (C) 2009-2011 - Tyler Bell
+ * @license GNU General Public License
+ */
+```
