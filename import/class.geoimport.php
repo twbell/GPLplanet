@@ -286,14 +286,7 @@ class geoimport extends geoengine {
 		
 		//remove file
 		unlink($tempFile);
-		
-		/*
-		//delete records from temp table
-		$SQL3 = "DELETE FROM " . self :: TEMPTABLEDESC . " WHERE woeid=" . $woeid;
-		$result3 = $this->query($SQL3);
-		*/
-		
-		
+
 		//return
 		return $tempArray;
 	}
