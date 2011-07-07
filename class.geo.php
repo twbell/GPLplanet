@@ -164,6 +164,13 @@ class geo {
 		return $this->name;
 	}
 
+	/** Get country
+	* @return string placename
+	*/
+	public function getCountry() {
+		return $this->country;
+	}
+
 	/** Get placename with geographic context or qualifier
 	* Falls back to normal name if not context name available
 	* @param Bool nameType return string label of place type
@@ -190,7 +197,7 @@ class geo {
 	 * Gets latitude
 	 * @return real
 	 */
-	public function getLon(){
+	public function getLat(){
 		$coords = $this->getCentroid();
 		return $coords['lat'];
 	}
