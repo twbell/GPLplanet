@@ -374,9 +374,11 @@ class geoservice {
 			$this->logMsg(__METHOD__ . " YQL Error on " . $qString . ": " . $http_response_header[0] . "\n");
 			return false;
 		}
-
+		
 		$result = json_decode($result);
 
+		print_r($result);
+		
 		return $result;
 
 	}

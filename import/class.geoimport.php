@@ -233,6 +233,25 @@ class geoimport extends geoengine {
 	}
 
 	/**
+	* Removes temp files from interrupted descendants calculation
+	* @return array
+	*/
+	public function cleanTempFilesDesc(){
+		$tempDir = sys_get_temp_dir();
+		if ($handle = opendir($tempDir)) {
+		    while (false !== ($file = readdir($handle))) {
+		        if (strstr($file,"gplp-desc-")){
+		        	unlink($tempDir."/".$file);
+		        }
+		    }
+		    closedir($handle);
+		    return true;
+		} else {
+			return false;
+		}
+	}
+
+	/**
 	* Recursively gets all children of a place to create optimized descendants table, and write descendants to table
 	* Uses an intermediate table while iterating; enure enough space in the MySQL temp drive
 	* @param int woeid
