@@ -258,13 +258,17 @@ class geoimport extends geoengine {
 	* @return array
 	*/
 	public function getDescendants($woeid) {
-		$delineator = "\n"; //delineates ids in file
+		$delineator = ","; //delineates ids in file
 		//first check to see whether this has been computed and cached already; if so, use it
 		if ($desc = parent :: getDescendants($woeid)) {
 			return $desc;
 		}
 		//get children of woeid	
 		$aChildren = $this->getChildren($woeid);	
+		//return empty  arrayif not children
+		if (empty($aChildren)){
+			return array();
+		}
 		//create temp file to hold descendants
 		$tempFile = sys_get_temp_dir()."/gplp-desc-".$woeid.".tmp";
 		if (!$fp = fopen($tempFile, 'w')){//open file for writing
@@ -273,14 +277,16 @@ class geoimport extends geoengine {
 		}
 		//iterate and recurse
 		foreach ($aChildren as $child) {
-			if ($child) {
-				//merge child with its descendents						
-				$tempDesc = $this->getDescendants($child);
+			//merge child with its descendents	
+			$tempDesc = $this->getDescendants($child);
+			if (!empty($tempDesc)){
 				$tempDesc[] = $child;
-				//write descendants to temp file
-				fwrite($fp, implode($delineator,$tempDesc));
-				unset($tempDesc);
-			}
+				fwrite($fp, $delineator.implode($delineator,$tempDesc));
+			} else {
+				$tempDesc = array($child);
+				fwrite($fp, $delineator.$child);
+			}			
+			unset($tempDesc);
 		}
 		//close file
 		fclose($fp);
@@ -291,20 +297,16 @@ class geoimport extends geoengine {
 			echo "Failed reading ".$tempFile."; exiting.\n";
 			exit;
 		};
-		$tempArray = explode($delineator,$tempArray);
-		$tempArray = array_filter($tempArray); //remove empty items
-		$tempArray = array_unique($tempArray); //double-check that we do not have dupes in the array
-		
-		//return if empty (should never get here)
-		if (count($tempArray) === 0 || empty($tempArray)){
-			return array();
-		}
-		
-		//insert descendants into descendants table
-		$this->insertDescendants($woeid, $tempArray);
 		
 		//remove file
 		unlink($tempFile);
+		
+		$tempArray = explode($delineator,$tempArray); //create array from file contents
+		$tempArray = array_filter($tempArray); //remove empty items
+		$tempArray = array_unique($tempArray); //double-check that we do not have dupes in the array
+		
+		//insert descendants into descendants table
+		$this->insertDescendants($woeid, $tempArray);
 
 		//return
 		return $tempArray;
@@ -873,6 +875,7 @@ class geoimport extends geoengine {
 		}
 		$disp = number_format($perc * 100, 0);
 		$status_bar .= "] $disp%  $done/$total";
+		if ($done === 0){$done = 1;}//avoid div zero warning
 		$rate = ($now - $start_time) / $done;
 		$left = $total - $done;
 		$eta = round($rate * $left, 2);
