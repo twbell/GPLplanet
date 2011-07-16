@@ -9,7 +9,7 @@
  * @license GNU General Public License
  */
 
-require_once ('../class.geoengine.php');
+require_once(dirname(__FILE__)."/../class.geoengine.php");
 class geoimport extends geoengine {
 
 	public $dbName = "geo";
@@ -71,17 +71,22 @@ class geoimport extends geoengine {
 	* @return Bool
 	*/
 	public function populateSiblings() {
-		echo "Populating siblings...";
+		echo "Populating siblings...\n";
+		flush();
 		$SQL1 = "SELECT woeid, placetype FROM " . self :: TABLEPLACES . " WHERE woeid NOT IN (SELECT woeid FROM " . self :: TABLESIBLINGS . ")";
 		$result1 = $this->query($SQL1, true);
-		echo "Found " . $result1->num_rows . " unprocessed siblings; processing...";
+		$total = $result1->num_rows;
+		$i=0;
+		//echo "Found " . $result1->num_rows . " unprocessed siblings; processing...";
 		while ($row1 = $result1->fetch_array(MYSQLI_ASSOC)) {
+			$i++;
 			$parentID = $this->getParent($row1['woeid']);
 			if (!$parentID) {
 				continue;
 			}
 			//get children of parent
 			$aChildren = $this->getChildren($parentID);
+			
 			if (empty ($aChildren)) {
 				continue;
 			}
@@ -95,10 +100,11 @@ class geoimport extends geoengine {
 			while ($row4 = $result4->fetch_array(MYSQLI_ASSOC)) {
 				$aSiblings[] = $row4['woeid'];
 			}
-			$sSiblings = implode(",", $aSiblings);
+			$SQL5 = "INSERT INTO " . self :: TABLESIBLINGS . " (woeid, siblings) VALUES (" . $row1['woeid'] . ",\"" . implode(",", $aSiblings) . "\")";
 			unset ($aSiblings);
-			$SQL5 = "INSERT INTO " . self :: TABLESIBLINGS . " (woeid, siblings) VALUES (" . $row1['woeid'] . ",\"" . $sSiblings . "\")";
 			$result5 = $this->query($SQL5);
+			$this->show_status($i, $total); //update status bar
+			
 		}
 		echo " complete\n";
 		return true;
@@ -136,45 +142,34 @@ class geoimport extends geoengine {
 	* @return Bool
 	*/
 	public function populateDescendants() {
-		echo "Populating descendants by type... (takes a while) \n";
+		echo "Populating descendants... \n";
 		flush();
-		//iterate by placetype, smallest first, to optimize memory use.
-		$placeTypeOrder = array (20,6,11,15,16,17,22,32,33,3,37,38,14,13,7,35,10,24,25,9,27,8,26,12,19,31,18,21,29,36);
-		
 		//get total count for status reporting
-		$SQL0 = "SELECT COUNT(woeid) AS res FROM " . self :: TABLEPLACES;
-		$SQL0 .= " WHERE placetype IN (" . implode(",",$placeTypeOrder) . ") AND woeid != 1"; //filter by type and do not need earth
-		$SQL0 .= " AND woeid IN (SELECT parent from " . self :: RAWPLACES . ")"; //parents only
+		$SQL0 = "SELECT DISTINCT parent_id AS res FROM " . self :: TABLEPARENTS. " WHERE parent_id != 0 AND parent_id != 1"; //all parents, not earth
 		$result0 = $this->query($SQL0);
-		$row = $result0->fetch_array(MYSQLI_ASSOC);
-		$total = $row['res'];
+		$total = $result0->num_rows;
 		unset($result0);
-		unset($row);
+		unset($SQL0);
 		
 		//select and iterate through each woeid
-		foreach ($placeTypeOrder as $placeType) {
-			$SQL1 = "SELECT woeid FROM " . self :: TABLEPLACES;
-			$SQL1 .= " WHERE placetype =" . $placeType . " AND woeid != 1"; //filter by type and do not need earth
-			$SQL1 .= " AND woeid IN (SELECT parent from " . self :: RAWPLACES . ")"; //parents only
-			$SQL1 .= " AND woeid NOT IN (SELECT woeid FROM " . self :: TABLEDESCENDANTS . ")"; //as-yet unprocessed
-			$result1 = $this->query($SQL1);
-			$rowCount = $result1->num_rows;
-			if ($rowCount > 0) {
-				while ($row1 = $result1->fetch_array(MYSQLI_ASSOC)) {
-					$this->show_status($this->countDescendants(), $total); //update status bar
-					flush();
-					//double-check that this woeid has not been calculated
-					if (!$this->descAreCalc($row1['woeid'])){
-						$this->getDescendants($row1['woeid']); //this generates _and_ caches 	
-					}
+		$SQL1 = "SELECT DISTINCT parent_id FROM " . self :: TABLEPARENTS. " WHERE parent_id != 0 AND parent_id != 1";
+		$SQL1 .= " AND parent_id NOT IN (SELECT woeid FROM " . self :: TABLEDESCENDANTS . ")"; //as-yet unprocessed
+		$result1 = $this->query($SQL1);
+		$rowCount = $result1->num_rows;
+		if ($rowCount > 0) {
+			while ($row1 = $result1->fetch_array(MYSQLI_ASSOC)) {
+				$this->show_status($this->countDescendants(), $total); //update status bar
+				flush();
+				//double-check that this woeid has not been calculated
+				if (!$this->descAreCalc($row1['parent_id'])){
+					$this->getDescendants($row1['parent_id']); //iterate, generate _and_ writes 	
 				}
 			}
 		}
 		echo "complete\n";
 		return true;
 	}
-
-
+	
 	/**
  	* Checks whether descendants have been calculated
  	* @param into woeid
