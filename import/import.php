@@ -49,11 +49,17 @@ echo "\nxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n";
 echo "Import Files Verified\n";
 //create database
 echo "Creating Data Structure\n";
-if (!$importEngine->createDatabase()){exit;}
+if (!$importEngine->createDatabase()){
+	echo "Creating database falied\n";
+	exit;
+}
 //create table to track import progress (if not exist)
 if (!$importEngine->createTrackerTable($importProgress)){exit;}
 //get last stage of import completed
 $lastStage = $importEngine->getMaxTracker($importProgress);
+//cleaning old files
+echo "Removing old temp files, if any...\n";
+$importEngine->cleanTempFilesDesc();
 //import files
 echo "Importing Yahoo Geoplanet Data\n";
 
@@ -137,15 +143,22 @@ switch ($lastStage) {
 		} else {
 			$importEngine->addTracker(11,$importProgress);
 		}	
-	//populate ancestors 12
+	//populate descendants 12
 	case 11:
 		if (!$importEngine->populateDescendants()){
 			exit;
 		} else {
 			$importEngine->addTracker(12,$importProgress);
 		}	
-	//Complete import
+	//populate descendants 13
 	case 12:
+		if (!$importEngine->populateSiblings()){
+			exit;
+		} else {
+			$importEngine->addTracker(13,$importProgress);
+		}			
+	//Complete import
+	case 13:
 		$importEngine->dropTrackerTable($importProgress);
 		echo "Import complete\n";
 }
