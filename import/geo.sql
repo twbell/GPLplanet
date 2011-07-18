@@ -142,7 +142,7 @@ CREATE TABLE IF NOT EXISTS `geo_placetypes` (
 --
 CREATE TABLE IF NOT EXISTS `geo_siblings` (
   `woeid` int(10) unsigned NOT NULL,
-  `siblings` mediumtext COLLATE utf8_unicode_ci NOT NULL,
+  `siblings` longtext COLLATE utf8_unicode_ci NOT NULL,
   PRIMARY KEY (`woeid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci  COMMENT='Siblings lookup';
 

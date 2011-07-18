@@ -80,35 +80,57 @@ class geoimport extends geoengine {
 		//echo "Found " . $result1->num_rows . " unprocessed siblings; processing...";
 		while ($row1 = $result1->fetch_array(MYSQLI_ASSOC)) {
 			$i++;
+			if ($this->siblingsAreCalc($row1['woeid'])){ //already calculated check
+				continue; 
+			}
 			$parentID = $this->getParent($row1['woeid']);
-			if (!$parentID) {
+			if (!$parentID) { //no parent check  (unlikely)
 				continue;
 			}
 			//get children of parent
-			$aChildren = $this->getChildren($parentID);
-			
-			if (empty ($aChildren)) {
+			$aChildren = $this->getChildren($parentID);		
+			if (empty ($aChildren)) { //no children check
 				continue;
 			}
 			//get those entities of only that type
-			$SQL4 = "SELECT woeid FROM " . self :: TABLEPLACES . " WHERE woeid IN (" . implode(",", $aChildren) . ") AND placetype=" . $row1['placetype'] . " AND woeid !=" . $row1['woeid'];
+			$SQL4 = "SELECT woeid FROM " . self :: TABLEPLACES . " WHERE woeid IN (" . implode(",", $aChildren) . ") AND placetype=" . $row1['placetype'];
 			$result4 = $this->query($SQL4);
-			if ($result4->num_rows === 0) {
+			if ($result4->num_rows === 1) { //this entity has no siblings
 				continue;
 			}
 			//process and insert siblings
 			while ($row4 = $result4->fetch_array(MYSQLI_ASSOC)) {
-				$aSiblings[] = $row4['woeid'];
+				$aSiblings[$row4['woeid']] = $row4['woeid']; //index and value are identical
 			}
-			$SQL5 = "INSERT INTO " . self :: TABLESIBLINGS . " (woeid, siblings) VALUES (" . $row1['woeid'] . ",\"" . implode(",", $aSiblings) . "\")";
+			foreach ($aSiblings as $sibling){
+			 	$tempSiblings = $aSiblings;
+				unset($tempSiblings[$sibling]); //remove self
+				$SQL5 = "INSERT INTO " . self :: TABLESIBLINGS . " (woeid, siblings) VALUES (" . $sibling . ",\"" . implode(",", $tempSiblings) . "\")";
+				$result5 = $this->query($SQL5);
+			}
+			unset($tempSiblings);
 			unset ($aSiblings);
-			$result5 = $this->query($SQL5);
+			unset($result5);
+			$i = $i + (count($aSiblings)-1);
 			$this->show_status($i, $total); //update status bar
-			
 		}
 		echo " complete\n";
 		return true;
 	}
+	
+	/**
+	 * Checks whether siblings have been calculated for this woeid
+	 */
+	protected function siblingsAreCalc($woeid){
+		$SQL = "SELECT woeid FROM " . self :: TABLESIBLINGS . " WHERE woeid=".$woeid;
+		$result = $this->query($SQL);
+		if ($result->num_rows === 0) {
+			return false;
+		} else {
+			return true;
+		}
+	}
+	
 
 	/**
 	 * Gets bag of parents for one or more woeids
@@ -129,7 +151,14 @@ class geoimport extends geoengine {
 
 
 	protected function countDescendants(){
-		$SQL = "SELECT COUNT(woeid) AS res FROM geo_descendants";
+		$SQL = "SELECT COUNT(woeid) AS res FROM ".self::TABLEDESCENDANTS;
+		$result = $this->query($SQL);
+		$row = $result->fetch_array(MYSQLI_ASSOC);
+		return $row['res'];
+	}
+
+	protected function countSiblings(){
+		$SQL = "SELECT COUNT(woeid) AS res FROM ".self :: TABLESIBLINGS;
 		$result = $this->query($SQL);
 		$row = $result->fetch_array(MYSQLI_ASSOC);
 		return $row['res'];
