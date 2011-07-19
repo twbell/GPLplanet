@@ -37,6 +37,39 @@ require_once ('class.geoimport.php');
 $importEngine = new geoimport; 	//uses db name from config file. Override by assigning var $importEngine->dbName = your_new_database_name
 $importProgress = "import";		//table name for tracking import progress					
 
+//check config file
+$thisDir = dirname(__FILE__);
+$configFile = $thisDir."/../config.ini";
+if (is_readable($configFile)) {
+	$cfg = parse_ini_file($configFile);
+} else {
+	//can't operate without db configs, so barf and bail
+	if (is_file($configFile)){
+		$errMsg = "unreadable config file " . $configFile . "; check file permissions\n";	
+	} else {
+		$errMsg = "missing config file " . $configFile . "\n";	
+	}
+	echo $errMsg;
+	exit;
+}
+
+$bail = false;
+if (!$cfg['host']){
+$errMsg = "No host provided in config file " . $configFile . "\n";	
+	$bail = true;
+}
+if (!$cfg['username']){
+$errMsg = "No username provided in config file " . $configFile . "\n";	
+	$bail = true;
+}		
+if (!$cfg['username']){
+$errMsg = "No database name provided in config file " . $configFile . "\n";	
+	$bail = true;
+}			
+if ($bail){
+	exit;
+}
+
 //check files
 foreach ($files as $file){
 	if (!is_readable($file)){
