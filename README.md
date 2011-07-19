@@ -39,9 +39,9 @@ Lastly: a reminder that the geoplanet data dump does not contain coordinates, wh
 ##GETTING STARTED
 ### Create and Populate Database
 ```bash
-gunzip gplplanet.sql.zip
+gunzip [path/to/gplplanet]/import/gplplanet.sql.zip
 mysql create database geo
-mysql -u [username] -p --max_allowed_packet=1GB geo < gplplanet.sql
+mysql -u [username] -p --max_allowed_packet=1GB geo < [path/to/]gplplanet.sql
 ```
 
 ### or Import the Geoplanet TSV files
@@ -114,6 +114,7 @@ Example command line scripts live in the scripts folder:
     * import/class.import.php  *Methods for tsv data import*
     * import/import.php		*Procedural script for importing tsv data*
     * import/geo.sql			*SQL script for creating database*
+    * import/gplplanet.sql.zip   *SQL dump of geoplanet optimized for gplplanet*
 * scripts					*Command line examples*
     * script/children.php		*Getting children of woeid*
     * script/get.php			*Instantiating woeid*
