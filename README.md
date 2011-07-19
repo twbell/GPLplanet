@@ -46,15 +46,8 @@ mysql -u [username] -p --max_allowed_packet=1GB geo < gplplanet.sql
 
 ### or Import the Geoplanet TSV files
 
-1. Download geoplanet files from Yahoo
-2. Unzip geoplanet TSVs
-3. Configure import/import.php with location of TSV files
-4. Run import.php: 
+(see below)
 
-```bash
-cd [path/to/gplplanet/import]
-php import.php
-```
 Default database is 'geo'.  You can select any database name, but ensure that it is configured in config.ini
 
 ## METHOD EXAMPLES
