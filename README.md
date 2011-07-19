@@ -37,27 +37,41 @@ http://isithackday.com/geoplanet-explorer/
 Lastly: a reminder that the geoplanet data dump does not contain coordinates, which must be obtained from the GeoPlanet web service directly.  However, gplplanet wraps the GeoPlanet web service transparently.
   
 ##GETTING STARTED
-### Create pre-populated database
-```gunzip gplplanet.sql.zip```
-```mysql create database geo```
-``mysql -u [username] -p --max_allowed_packet=1GB geo < gplplanet.sql```
+### Create and Populate Database
+```bash
+gunzip gplplanet.sql.zip
+mysql create database geo
+mysql -u [username] -p --max_allowed_packet=1GB geo < gplplanet.sql
+```
 
 ### or Import the Geoplanet TSV files
+
+1. Download geoplanet files from Yahoo
+2. Unzip geoplanet TSVs
+3. Configure import/import.php with location of TSV files
+4. Run import.php: 
+
+```bash
+cd [path/to/gplplanet/import]
+php import.php
+```
+Default database is 'geo'.  You can select any database name, but ensure that it is configured in config.ini
+
+## METHOD EXAMPLES
 Require the geoengine class and get an instance thereof:
 
 ``` php
 require_once('class.geoengine.php');			
 $engine = geoengine::getInstance();             //geoengine is a factory singleton
 ```
-Default database is 'geo'.  You can select any database name, but ensure that it is configured in config.ini
+Start geoplaneting:
 
-## METHOD EXAMPLES
 ``` php
-$engine->disambiguate("springfield");           //the most likely 'Springfield'
 $engine->getChildren(31278);                    //children of woeid 31278 (Oxford, UK)
 $engine->getParent(31278);                    	//parent of woeid 31278
 $engine->getElevationByWOEID(2461928);          //elevation of woeid 2461928 (Northfield, MN) -- (uses web service)
 $engine->getByName("springfield","UK");         //all places called "Springfield" in UK
+$engine->disambiguate("springfield");           //the most likely 'Springfield'
 $engine->geocode("1 infinity loop, Cupertino, ca"); //geocodes -- (uses web service)
 $engine->reverseGeocode(0.151490,52.145329);    //reverse geocodes -- (uses web service)
 $engine->getBbox(727232);                       //bounding box of Amsterdam -- (uses web service)
