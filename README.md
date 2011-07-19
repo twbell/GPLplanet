@@ -72,21 +72,15 @@ $engine->filterByType($engine->getDescendants(23424977),7); //all towns in US
 $engine->getAdjacencies(2468964);               //all entities surrounding woeid 2468964 (Pasedena, CA)
 engine->getGeo(2468964);			//get an object representation of woeid 2468964		
 ```
-##USE OF EXTERNAL WEB SERVICES
-Some methods call Yahoo and other web services via YQL.  The results of these calls are cached so (for example) if you 
-request the Bounding box of an entity, the webservice will not be called if request a second time.  The general idea is 
-to seamlessly incorporate the webservice calls only where required.
-
 ## GEO OBJECTS
 Geo objects are lightweight entities that share a common geoengine singleton -- basically a factory class -- where the bulk of 
-the code (and processing power) lies. They are intended as handy encapsulations but are not required.  All methods 
+the code (and processing power) lies. They are intended to be employed as handy encapsulations but are not required.  All methods 
 return WOEIDs as INT or arrays of INT, which can be instantiated as geo objects.  
 
 ``` php
-	$engine->getGeo(INT);				//instantiates woeid as geo object
-	$engine->getMultiGeo(ARRAY);			//instantiates array of woeids as array of geo object
+	$engine->getGeo(INT);				//instantiates single woeid as geo object
+	$engine->getMultiGeo(ARRAY);		//instantiates multiple woeids as array of geo objects
 ```	
-
 Geo objects contain mostly identical methods using the same naming convention as the geoengine factory class:
 
 ``` php
@@ -100,6 +94,11 @@ serves the same purpose as:
 ```	
 
 and is equally efficient.
+
+##USE OF EXTERNAL WEB SERVICES
+Some methods call Yahoo and other web services via YQL.  The results of these calls are cached so (for example) if you 
+request the Bounding box of an entity, the webservice will not be called if request a second time.  The general idea is 
+to seamlessly incorporate the webservice calls only where required.
 
 ##COMMAND LINE SCRIPTS
 Example command line scripts live in the scripts folder:
@@ -150,8 +149,8 @@ Not tested with version 4 of either one.
 * Largest array produced at runtime (after import) is just under 18MB (UK descendants)
 
 ##TODO
-* Siblings data optimization (currently not cached)
 * BelongTo service integration
+* YQL oauth implmentation for higher query throughput
 * Name search JS code examples for as-you-type lookup
 * Experiment with SimpleDB (currently MySQL)
 * Reconsider how relationships (descendants etc) are cached.  Now just larger arrays in single field -- not elegant.
