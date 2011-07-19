@@ -547,7 +547,6 @@ class geoengine {
 		return $this->filterByType($children, $placeType);
 	}
 
-
 	/**
 	 * Gets all descendants (childrens children etc) for a given woeid
 	 * @param int woeid

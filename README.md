@@ -37,13 +37,19 @@ http://isithackday.com/geoplanet-explorer/
 Lastly: a reminder that the geoplanet data dump does not contain coordinates, which must be obtained from the GeoPlanet web service directly.  However, gplplanet wraps the GeoPlanet web service transparently.
   
 ##GETTING STARTED
-Import the Geoplanet TSV files (or find a cheeky sqldump of the gplplanet tables)
+### Create pre-populated database
+```gunzip gplplanet.sql.zip```
+```mysql create database geo```
+``mysql -u [username] -p --max_allowed_packet=1GB geo < gplplanet.sql```
+
+### or Import the Geoplanet TSV files
 Require the geoengine class and get an instance thereof:
 
 ``` php
 require_once('class.geoengine.php');			
 $engine = geoengine::getInstance();             //geoengine is a factory singleton
 ```
+Default database is 'geo'.  You can select any database name, but ensure that it is configured in config.ini
 
 ## METHOD EXAMPLES
 ``` php
