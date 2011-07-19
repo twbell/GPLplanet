@@ -32,7 +32,7 @@ $files['adjacencies'] = "/tmp/geoplanet_adjacencies_7.6.0.tsv";
 
 //==================== Usually no need to edit below this line =================
 set_time_limit(0);		  		//no timeout (always the case with CLI tho)
-error_reporting(E_ALL); 		//runtime error reporting level
+error_reporting(E_ERROR); 		//runtime error reporting level
 require_once ('class.geoimport.php');
 $importEngine = new geoimport; 	//uses db name from config file. Override by assigning var $importEngine->dbName = your_new_database_name
 $importProgress = "import";		//table name for tracking import progress					
@@ -150,15 +150,8 @@ switch ($lastStage) {
 		} else {
 			$importEngine->addTracker(12,$importProgress);
 		}	
-	//populate descendants 13
-	case 12:
-		if (!$importEngine->populateSiblings()){
-			exit;
-		} else {
-			$importEngine->addTracker(13,$importProgress);
-		}			
 	//Complete import
-	case 13:
+	case 12:
 		$importEngine->dropTrackerTable($importProgress);
 		echo "Import complete\n";
 }

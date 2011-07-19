@@ -252,7 +252,7 @@ class geo {
 		if ($this->siblings) {
 			return $this->siblings;
 		}
-		$this->siblings = $this->getEngine()->getSiblings($this->woeid);
+		$this->siblings = $this->getEngine()->getSiblings($this->woeid,$this->placeType);
 		return $this->siblings;
 	}
 

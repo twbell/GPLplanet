@@ -69,7 +69,7 @@ class geoimport extends geoengine {
 	* Populate Sibling Places -- those of same type having same parent
 	* Processes only those not processed
 	* @return Bool
-	*/
+	
 	public function populateSiblings() {
 		echo "Populating siblings...\n";
 		flush();
@@ -98,29 +98,34 @@ class geoimport extends geoengine {
 			if ($result4->num_rows === 1) { //this entity has no siblings
 				continue;
 			}
-			//process and insert siblings
+			//create array of all siblings
 			while ($row4 = $result4->fetch_array(MYSQLI_ASSOC)) {
 				$aSiblings[$row4['woeid']] = $row4['woeid']; //index and value are identical
 			}
+			//iterate through each sibling,  and insert
 			foreach ($aSiblings as $sibling){
 			 	$tempSiblings = $aSiblings;
 				unset($tempSiblings[$sibling]); //remove self
-				$SQL5 = "INSERT INTO " . self :: TABLESIBLINGS . " (woeid, siblings) VALUES (" . $sibling . ",\"" . implode(",", $tempSiblings) . "\")";
+				$tempSiblings = implode(",", $tempSiblings); //convert to string
+				$SQL5 = "INSERT INTO " . self :: TABLESIBLINGS . " (woeid, siblings) VALUES (" . $sibling . ",\"" . $tempSiblings . "\")";
+				$SQL5 .= " ON DUPLICATE KEY UPDATE  siblings=\"".$tempSiblings."\""; //sometimes interrupted processes will lead to dupe key, this cathes those edge cases
 				$result5 = $this->query($SQL5);
 			}
 			unset($tempSiblings);
-			unset ($aSiblings);
 			unset($result5);
 			$i = $i + (count($aSiblings)-1);
+			unset ($aSiblings);
 			$this->show_status($i, $total); //update status bar
 		}
 		echo " complete\n";
 		return true;
 	}
+	*/
+	
 	
 	/**
 	 * Checks whether siblings have been calculated for this woeid
-	 */
+	
 	protected function siblingsAreCalc($woeid){
 		$SQL = "SELECT woeid FROM " . self :: TABLESIBLINGS . " WHERE woeid=".$woeid;
 		$result = $this->query($SQL);
@@ -130,7 +135,7 @@ class geoimport extends geoengine {
 			return true;
 		}
 	}
-	
+	 */
 
 	/**
 	 * Gets bag of parents for one or more woeids
@@ -157,13 +162,15 @@ class geoimport extends geoengine {
 		return $row['res'];
 	}
 
+	/*
 	protected function countSiblings(){
 		$SQL = "SELECT COUNT(woeid) AS res FROM ".self :: TABLESIBLINGS;
 		$result = $this->query($SQL);
 		$row = $result->fetch_array(MYSQLI_ASSOC);
 		return $row['res'];
 	}
-
+	*/
+	
 	/**
 	* Populate Descendants
 	* This process is slightly unusual in that inserts occur in the get() rather than populate() method. 

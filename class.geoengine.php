@@ -392,14 +392,14 @@ class geoengine {
 	* Filters an array of woeids by one or more placetypes
 	* Use in combination with descendants and ancestors to get the zips in a state, the state for a county, the county of a city, etc.
 	* @param array woeid array of woeids
-	* @param int type numeric place type (int) or an array thereof
+	* @param mixed type numeric place type (int or array of types)
 	* @return array
 	*/
 	public function filterByType(array $woeid, $type) {
 		if (count($woeid) === 0) {
 			return array ();
 		}
-		if (!is_array($type)) {
+		if (!is_array($type)) { 
 			$type = array (
 				$type
 			);
@@ -517,6 +517,36 @@ class geoengine {
 		$row = $result->fetch_array(MYSQLI_ASSOC);
 		return $row['parent_id'];
 	}
+
+	/**
+	 * Gets all places with same parent (of same placetype)
+	 * In sympathy with Geoplanet web service, the resultset contains the submitted woeid
+	* @param int woeid Where-On-Earth Identifier
+	* @return array
+	*/ 
+	public function getSiblings($woeid,$placetype = null){
+		if (!$placetype){
+		//get placetype of woeid
+			$SQL1 = "SELECT placetype FROM " . self :: TABLEPLACES . " WHERE woeid=".$woeid;
+			$result1 = $this->query($SQL1);
+			$row1 = $result1->fetch_array(MYSQLI_ASSOC);
+			$placeType = $row1['placetype'];
+		}
+		//get parentID
+		$parentID = $this->getParent($woeid);
+		if (!$parentID) { //no parent check  (unlikely)
+			return false;
+		}
+		//get all children for this parent
+		$children = $this->getChildren($parentID);
+		//check if only one result (no other siblings)
+		if (count($children === 1)){
+			return $children;
+		}
+		//filter by placetype and return
+		return $this->filterByType($children, $placeType);
+	}
+
 
 	/**
 	 * Gets all descendants (childrens children etc) for a given woeid

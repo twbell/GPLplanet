@@ -138,16 +138,6 @@ CREATE TABLE IF NOT EXISTS `geo_placetypes` (
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci  COMMENT='Placetypes lookup';
 
 --
--- Create table `geo_siblings`
---
-CREATE TABLE IF NOT EXISTS `geo_siblings` (
-  `woeid` int(10) unsigned NOT NULL,
-  `siblings` longtext COLLATE utf8_unicode_ci NOT NULL,
-  PRIMARY KEY (`woeid`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci  COMMENT='Siblings lookup';
-
-
---
 -- Create table `cache_geocode`
 --
 CREATE TABLE IF NOT EXISTS `geo`.`cache_geocode` (
