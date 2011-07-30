@@ -369,18 +369,12 @@ class geoservice {
 		$endPoint = $this->yqlEndPoint . "?q=" . urlencode($qString) . "&" . $sData;
 		$this->webserviceWait();		//pause if required before calling webservice again
 		@ $result = file_get_contents($endPoint);
-
 		if (!$result) {
 			throw new Exception(__METHOD__ . " YQL Error on " . $qString . ": " . $http_response_header[0] . "\n");
 			return false;
 		}
-		
 		$result = json_decode($result);
-
-		print_r($result);
-		
 		return $result;
-
 	}
 
 	/**
