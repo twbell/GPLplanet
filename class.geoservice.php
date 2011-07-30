@@ -371,7 +371,7 @@ class geoservice {
 		@ $result = file_get_contents($endPoint);
 
 		if (!$result) {
-			$this->logMsg(__METHOD__ . " YQL Error on " . $qString . ": " . $http_response_header[0] . "\n");
+			throw new Exception(__METHOD__ . " YQL Error on " . $qString . ": " . $http_response_header[0] . "\n");
 			return false;
 		}
 		
