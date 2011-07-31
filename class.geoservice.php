@@ -31,7 +31,7 @@ class geoservice {
 	
 	
 	/**
-	 * Sets whether YQL return vars are checks for exceeding service limit (default = true)
+	 * Sets whether YQL return vars are checked for exceeding service limit (default = true)
 	 * @param bool check 
 	 * @return true
 	 */
