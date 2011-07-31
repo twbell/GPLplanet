@@ -29,6 +29,17 @@ class geoservice {
 
 	//============================= Methods =================================
 	
+	
+	/**
+	 * Sets whether YQL return vars are checks for exceeding service limit (default = true)
+	 * @param bool check 
+	 * @return true
+	 */
+	public function setCheckServiceStatus($check){
+		$this->checkServiceStatus = $check;
+		return true;
+	}
+	
 	 /**
 	 * Pauses script appropriate time before calling webservice again
 	 * @param timestamp unix timestamp
@@ -382,9 +393,11 @@ class geoservice {
 		if ($this->checkServiceStatus){
 			if ($result->query->count === 0){
 				//run same query with diagnostics
-				$check = json_decode(file_get_contents($endPoint."&diagnostics=true"),true); //as array b/c obj vars and dashes fail
+				$check = json_decode(file_get_contents($endPoint."&diagnostics=true"),true); //as array b/c obj vars w/ dashes fail
 				if ($check['query']['diagnostics']['url']['http-status-code'] == 999){
-					throw new Exception("YQL error 999: limit appears to have been reached");
+					$err = "YQL error 999: limit appears to have been reached";
+					$this->logMsg($err);
+					throw new Exception($err);
 					return false;
 				}
 			}
