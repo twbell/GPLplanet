@@ -22,6 +22,7 @@ class geoservice {
 	//web service timings
 	protected $lastQuery; //timestamp of last web query, used to control calls-per-second 	 
  	protected $webServiceWait = 750000;  //webservice wait between calls in microseconds (0 = no wait)
+ 	protected $checkServiceStatus = true; //checks status of service if no results received (prevents hammering)
 
 	//table definitions
 	const TABLEGEOCODECACHE = "cache_geocode";  
@@ -368,12 +369,26 @@ class geoservice {
 		unset ($aVarComb);
 		$endPoint = $this->yqlEndPoint . "?q=" . urlencode($qString) . "&" . $sData;
 		$this->webserviceWait();		//pause if required before calling webservice again
+		//echo $endPoint."\n";
 		@ $result = file_get_contents($endPoint);
 		if (!$result) {
-			throw new Exception(__METHOD__ . " YQL Error on " . $qString . ": " . $http_response_header[0] . "\n");
+			$err = __METHOD__ . " YQL Error on " . $qString . ": " . $http_response_header[0];
+			throw new Exception($err);
 			return false;
 		}
 		$result = json_decode($result);
+		
+		//checks results for no love, calls diagnostics, and bails on error 999
+		if ($this->checkServiceStatus){
+			if ($result->query->count === 0){
+				//run same query with diagnostics
+				$check = json_decode(file_get_contents($endPoint."&diagnostics=true"),true); //as array b/c obj vars and dashes fail
+				if ($check['query']['diagnostics']['url']['http-status-code'] == 999){
+					throw new Exception("YQL error 999: limit appears to have been reached");
+					return false;
+				}
+			}
+		}
 		return $result;
 	}
 
