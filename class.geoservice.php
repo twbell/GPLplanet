@@ -21,7 +21,7 @@ class geoservice {
 	
 	//web service timings
 	protected $lastQuery; //timestamp of last web query, used to control calls-per-second 	 
- 	protected $webServiceWait = 750000;  //webservice wait between calls in microseconds (0 = no wait)
+ 	protected $webServiceWait = 1000000;  //webservice wait between calls in microseconds (0 = no wait)
  	protected $checkServiceStatus = true; //checks status of service if no results received (prevents hammering)
 
 	//table definitions
