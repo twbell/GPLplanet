@@ -20,8 +20,8 @@ class geoservice {
 	public $cache = true;		//cache geocoder calls
 	
 	//web service timings
-	protected $lastQuery; //timestamp of last web query, used to control calls-per-second 	 
- 	protected $webServiceWait = 1000000;  //webservice wait between calls in microseconds (0 = no wait)
+	protected $lastQuery = 0; //timestamp of last web query, used to control calls-per-second 	 
+ 	public $webServiceWait = 2.0;  //webservice wait between calls in seconds (0 = no wait)
  	protected $checkServiceStatus = true; //checks status of service if no results received (prevents hammering)
 
 	//table definitions
@@ -46,15 +46,15 @@ class geoservice {
 	 * @return array
 	 */  
 	 protected function webserviceWait(){
-	 	if (!$this->lastQuery){return true;} //no previous query
-	 	$microTime = microtime(true);
-	 	$timeSince = $microTime-$this->lastQuery;
-	 	if ($timeSince > $this->webServiceWait){
-	 		return true;
-	 	} else {
-	 		usleep($timeSince);
-	 		return true;
+	 	if ($this->lastQuery){
+		 	$timeSince = microtime(true)-$this->lastQuery;
+		 	if ($timeSince < $this->webServiceWait){		
+		 		$wait = $this->webServiceWait-$timeSince;
+		 		usleep(($wait)*1000000);
+		 	} 
 	 	}
+	 	$this->lastQuery = microtime(true);
+	 	return true;
 	 }
 
 	/**
@@ -379,8 +379,7 @@ class geoservice {
 		$sData = implode("&", $aVarComb);
 		unset ($aVarComb);
 		$endPoint = $this->yqlEndPoint . "?q=" . urlencode($qString) . "&" . $sData;
-		$this->webserviceWait();		//pause if required before calling webservice again
-		//echo $endPoint."\n";
+		$this->webserviceWait();		//pause as required before calling webservice again
 		@ $result = file_get_contents($endPoint);
 		if (!$result) {
 			$err = __METHOD__ . " YQL Error on " . $qString . ": " . $http_response_header[0];
@@ -393,7 +392,7 @@ class geoservice {
 		if ($this->checkServiceStatus){
 			if ($result->query->count === 0){
 				//run same query with diagnostics
-				$check = json_decode(file_get_contents($endPoint."&diagnostics=true"),true); //as array b/c obj vars w/ dashes fail
+				$check = json_decode(file_get_contents($endPoint."&diagnostics=true"),true); //as array; obj vars w/ dashes fail
 				if ($check['query']['diagnostics']['url']['http-status-code'] == 999){
 					$err = "YQL error 999: limit appears to have been reached";
 					$this->logMsg($err);
