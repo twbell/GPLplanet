@@ -27,10 +27,10 @@ class geoimport extends geoengine {
 	* @return Bool
 	*/
 	public function populateAncestors() {
-		echo "Populating ancestors...";
+		echo "Populating ancestors...\n";
 		$SQL1 = "SELECT woeid FROM " . self :: TABLEPLACES . " WHERE woeid NOT IN (SELECT woeid FROM " . self :: TABLEANCESTORS . ") AND woeid != 1"; //earth is an orphan
 		$result1 = $this->query($SQL1, true);
-		echo "found " . $result1->num_rows . " unprocessed ancestors; processing...";
+		echo "\tfound " . $result1->num_rows . " unprocessed ancestors; processing...\n";
 		$i = 0;
 		while ($row1 = $result1->fetch_array(MYSQLI_ASSOC)) {
 			$this->show_status($i, $result1->num_rows); //status bar
@@ -60,7 +60,7 @@ class geoimport extends geoengine {
 			unset ($aParents);
 			$i++;
 		}
-		echo " complete\n";
+		echo "\tcomplete\n";
 		return true;
 	}
 
@@ -200,7 +200,7 @@ class geoimport extends geoengine {
 				}
 			}
 		}
-		echo "complete\n";
+		echo "\t-complete\n";
 		return true;
 	}
 	
@@ -224,17 +224,17 @@ class geoimport extends geoengine {
 	* @return Bool
 	*/
 	public function addPlaceTypeCodes() {
-		echo "Adding placetype codes to places...";
+		echo "Adding placetype codes to places..\n";
 		$SQL = "UPDATE " . self :: TABLEPLACES . "," . self :: TABLEPLACETYPES;
 		$SQL .= " SET " . self :: TABLEPLACES . ".placetype=" . self :: TABLEPLACETYPES . ".id";
 		$SQL .= " WHERE " . self :: TABLEPLACES . ".placetypename=" . self :: TABLEPLACETYPES . ".shortname";
 		$SQL .= " AND " . self :: TABLEPLACES . ".placetype IS NULL"; //gets only those not yet updated
 		$result = $this->query($SQL);
 		//remove index on string placetype; no longer needed after this operation
-		echo " dropping string placetype index...";
+		echo "\t-dropping string placetype index...\n";
 		$SQL1 = "ALTER TABLE `" . self :: TABLEPLACES . "` DROP INDEX `placetypename_idx`";
 		$result1 = $this->query($SQL1);
-		echo " complete\n";
+		echo "\t-complete\n";
 		return true;
 	}
 
@@ -640,12 +640,12 @@ class geoimport extends geoengine {
 	* @return Bool
 	*/
 	public function populateChildren() {
-		echo "Populating children...";
+		echo "Populating children...\n";
 		$SQL1 = "SELECT DISTINCT parent FROM " . self :: RAWPLACES . " WHERE parent > 0 AND parent NOT IN (SELECT woeid FROM " . self :: TABLECHILDREN . ")"; //earth has no parent
 		$SQL2 = "SELECT woeid FROM " . self :: RAWPLACES . " WHERE parent="; //get children for each place
 		$SQL3 = "INSERT INTO " . self :: TABLECHILDREN . "(woeid,children) VALUES "; //insert bambini for each
 		$result1 = $this->query($SQL1);
-		echo " found " . $result1->num_rows . " unprocessed places with children; processing...";
+		echo "\t-found " . $result1->num_rows . " unprocessed places with children; processing...\n";
 		$i = 0;
 		while ($row1 = $result1->fetch_array(MYSQLI_ASSOC)) {
 			$this->show_status($i, $result1->num_rows); //status bar
@@ -657,7 +657,7 @@ class geoimport extends geoengine {
 			unset ($tempArray);
 			$i++;
 		}
-		echo " complete\n";
+		echo "\t-complete\n";
 		return true;
 	}
 
@@ -666,14 +666,14 @@ class geoimport extends geoengine {
 	* @return Bool
 	*/
 	public function populateParents() {
-		echo "Populating parents...";
+		echo "Populating parents...\n";
 		$this->disableKeys(self :: TABLEPARENTS);
 		$SQL = "INSERT INTO " . self :: TABLEPARENTS . " (woeid,parent_id)
 						SELECT woeid, parent 
 						FROM  " . self :: RAWPLACES;
 		if ($this->query($SQL)) {
 			$this->enableKeys(self :: TABLEPARENTS);
-			echo " complete\n";
+			echo "\t-complete\n";
 			return true;
 		} else {
 			return false;
@@ -685,7 +685,7 @@ class geoimport extends geoengine {
 	* @return Bool
 	*/
 	public function populateAdjacencies() {
-		echo "Populating adjacencies... ";
+		echo "Populating adjacencies... \n";
 		$SQL1 = "SELECT woeid FROM " . self :: TABLEPLACES. " WHERE woeid NOT IN (SELECT woeid FROM ".self :: TABLEADJACENCIES.")";
 		$SQL2 = "SELECT neighbor FROM " . self :: RAWADJACENCIES . " WHERE woeid="; //get adjacencies for once place at time
 		$SQL3 = "INSERT INTO " . self :: TABLEADJACENCIES . "(woeid,adjacencies) VALUES "; //insert
@@ -704,9 +704,9 @@ class geoimport extends geoengine {
 			}
 			$i++;
 		}
-		echo "building index... ";
+		echo "\t-building index... ";
 		$this->enableKeys(self :: TABLEADJACENCIES);
-		echo "complete\n";
+		echo "\t-complete\n";
 		return true;
 	}
 
@@ -726,7 +726,7 @@ class geoimport extends geoengine {
 		$this->typePlaceNames(); //add numeric placetypes to aliases for efficiency
 		echo "\t-adding country code...\n";
 		$this->addCountryToNames(); //add country code to names for efficiency
-		echo "\tcomplete\n";
+		echo "\t-complete\n";
 		return true;
 	}
 
