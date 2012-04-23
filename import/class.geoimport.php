@@ -515,7 +515,7 @@ class geoimport extends geoengine {
 			exit;
 		}
 		$db->set_charset("utf8"); //set client to utf8 
-		$SQL = "CREATE DATABASE IF NOT EXISTS " . $this->getDBName();
+		$SQL = "CREATE DATABASE IF NOT EXISTS " . $this->getDBName(). " CHARACTER SET utf8 COLLATE utf8_unicode_ci;";
 		$result = $db->query($SQL);
 		if (!$result) {
 			echo "Error creating database " . $this->getDBName() . ": " . $db->error. " Database already exists?\n";
@@ -600,8 +600,8 @@ class geoimport extends geoengine {
 	 */
 	public function tableExists($tableName) {
 		$SQL = "DESC " . $tableName;
-		$result = $this->query($SQL);
-		if ($this->getDB()->errno == 1146) {
+		@$result = $this->query($SQL);
+		if ($this->getDB()->db->errno == 1146) {
 			/*
 			$logMsg = "Table ".$tableName." does not exist\n";
 			$SQL2 = "SHOW TABLES";
