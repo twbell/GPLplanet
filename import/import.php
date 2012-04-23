@@ -7,7 +7,7 @@
  * 			- MySQL max_allowed_packet = 50M (or greater)
  * (1) Configure database connection vars in config.ini
  * (2) Download geoplanet data from http://developer.yahoo.com/geo/geoplanet/data/
- * (3) Add tsv file loations to the file variables below
+ * (3) Add tsv file loations to the import/files.ini
  * (4) cd to this dir and run this script from the command line: "php import.php"
  * 
  * Temp files are created in your system's (wait for it) temp directory, so ensure you have about 50GB 
@@ -24,15 +24,15 @@
  * @license GNU General Public License
  */
 
-//Full path to raw geoplanet files (change to suit your own path)
-$files['aliases'] = "/tmp/geoplanet_aliases_7.6.0.tsv";
-$files['places'] = "/tmp/geoplanet_places_7.6.0.tsv";
-$files['adjacencies'] = "/tmp/geoplanet_adjacencies_7.6.0.tsv";
+//runtime error reporting level
+//error_reporting(E_ERROR); 		
+error_reporting(E_ALL); 	
 
+//Get file locations from config
+$files = parse_ini_file('files.ini');
 
 //==================== Usually no need to edit below this line =================
 set_time_limit(0);		  		//no timeout (always the case with CLI tho)
-error_reporting(E_ERROR); 		//runtime error reporting level
 require_once ('class.geoimport.php');
 $importEngine = new geoimport; 	//uses db name from config file. Override by assigning var $importEngine->dbName = your_new_database_name
 $importProgress = "import";		//table name for tracking import progress					
@@ -62,7 +62,7 @@ if (!$cfg['username']){
 $errMsg = "No username provided in config file " . $configFile . "\n";	
 	$bail = true;
 }		
-if (!$cfg['username']){
+if (!$cfg['database']){
 $errMsg = "No database name provided in config file " . $configFile . "\n";	
 	$bail = true;
 }			
@@ -73,18 +73,24 @@ if ($bail){
 //check files
 foreach ($files as $file){
 	if (!is_readable($file)){
-		echo "Cannot read file ".$file." Please set file location on lns 27ff in import.php\n";
+		echo "Cannot read file ".$file." Please set file location in files.ini\n";
 		exit;
 	}
 }
 
 echo "\nxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n";
 echo "Import Files Verified\n";
-//create database
-echo "Creating Data Structure\n";
-if (!$importEngine->createDatabase()){
-	echo "Creating database falied\n";
-	exit;
+//check db exists
+if (in_array($cfg['database'],$importEngine->listDatbases())){
+	echo "Database ".$cfg['database']." exists\n";
+} else {
+	//create database
+	echo "Creating Database ".$cfg['database']."\n";
+	echo "Creating Data Structure\n";
+	if (!$importEngine->createDatabase()){
+		echo "Creating database falied\n";
+		exit;
+	}
 }
 //create table to track import progress (if not exist)
 if (!$importEngine->createTrackerTable($importProgress)){exit;}
@@ -126,6 +132,7 @@ switch ($lastStage) {
 		} else {
 			$importEngine->addTracker(4,$importProgress);
 		}	
+		
 	//populate places 5
 	case 4:
 		if (!$importEngine->populatePlaces()){
@@ -190,5 +197,5 @@ switch ($lastStage) {
 }
 
 
-
+exit;
 
