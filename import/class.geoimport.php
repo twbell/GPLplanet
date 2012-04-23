@@ -808,7 +808,7 @@ class geoimport extends geoengine {
 	*/
 	public function importAdjacencies($file) {
 		echo "Importing adjacencies data from " . $file . "...";
-		$SQL = "LOAD DATA INFILE '" . $file . "'
+		$SQL = "LOAD DATA LOCAL INFILE '" . $file . "'
 						INTO TABLE " . self :: RAWADJACENCIES . "
 						FIELDS TERMINATED BY '\t'  ENCLOSED BY '\"' 
 						IGNORE 1 LINES";
@@ -827,7 +827,7 @@ class geoimport extends geoengine {
 	*/
 	public function importAliases($file) {
 		echo "Importing alias data from " . $file . "...";
-		$SQL = "LOAD DATA INFILE '" . $file . "' 
+		$SQL = "LOAD DATA LOCAL INFILE '" . $file . "' 
 						INTO TABLE " . self :: RAWALIASES . "
 						FIELDS TERMINATED BY '\t'  ENCLOSED BY '\"'
 						IGNORE 1 LINES";
@@ -846,7 +846,7 @@ class geoimport extends geoengine {
 	*/
 	public function importPlaces($file) {
 		echo "Importing place data from " . $file . "...";
-		$SQL = "LOAD DATA INFILE '" . $file . "' 
+		$SQL = "LOAD DATA LOCAL INFILE '" . $file . "' 
 						INTO TABLE " . self :: RAWPLACES . "
 						FIELDS TERMINATED BY '\t'  ENCLOSED BY '\"'
 						IGNORE 1 LINES";
