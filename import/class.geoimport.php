@@ -500,7 +500,7 @@ class geoimport extends geoengine {
 		$SQL = "CREATE DATABASE IF NOT EXISTS " . $this->getDBName();
 		$result = $db->query($SQL);
 		if (!$result) {
-			echo "Error creating database " . $this->getDBName() . ": " . $db->error;
+			echo "Error creating database " . $this->getDBName() . ": " . $db->error. " Database already exists?";
 			exit;
 		} else {
 			echo "Empty Database " . $this->getDBName() . " created\n";
