@@ -19,7 +19,6 @@ class geoimport extends geoengine {
 	const RAWALIASES = "raw_aliases";
 	const RAWADJACENCIES = "raw_adjacencies";
 	const TEMPTABLEDESC = "temp_descendants";
-	
 
 	//=============== METHODS ==================
 
@@ -219,7 +218,6 @@ class geoimport extends geoengine {
 			return true;
 		}
 	}
-
 
 	/**
 	* Adds numeric placetype codes to places table
@@ -480,7 +478,7 @@ class geoimport extends geoengine {
 	}
 
 
-	public function testConnection(){
+	public function listDatbases(){
 		$cfg = $this->getConfig();
 		//create db
 		if (!$db = new mysqli($cfg['host'], $cfg['username'], $cfg['password'])) { //connect without database name
@@ -491,7 +489,10 @@ class geoimport extends geoengine {
 		$SQL = "SHOW DATABASES";
 		$result = $db->query($SQL);
 		if ($result->num_rows > 0) {
-			return true;
+			while ($row = $result->fetch_array(MYSQLI_ASSOC)){
+				$dbs[] = $row['Database'];
+			}
+			return $dbs;
 		} else {
 			return false;
 		}
@@ -545,6 +546,18 @@ class geoimport extends geoengine {
 		return true;
 	}
 
+	/**
+	 * Returns tables in database
+	 */
+	 public function showTables(){
+		$SQL = "SHOW TABLES";
+		$result = $db->query($SQL);	
+		while ($row = $result->fetch_array()) { 	
+			$tables[] = $row[0];
+		}
+		return $tables;
+	 }
+	 
 	/**
 	 * Adds alpha2 country code to names table (provides convenient shortcut)
 	 * @return bool
