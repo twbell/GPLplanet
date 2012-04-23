@@ -518,7 +518,7 @@ class geoimport extends geoengine {
 		$SQL = "CREATE DATABASE IF NOT EXISTS " . $this->getDBName(). " CHARACTER SET utf8 COLLATE utf8_unicode_ci;";
 		$result = $db->query($SQL);
 		if (!$result) {
-			echo "Error creating database " . $this->getDBName() . ": " . $db->error. " Database already exists?\n";
+			echo "Error creating database " . $this->getDBName() . ": " . $db->error." \n";
 			exit;
 		} else {
 			echo "Empty Database " . $this->getDBName() . " created\n";
@@ -561,6 +561,7 @@ class geoimport extends geoengine {
 		return true;
 	}
 
+
 	/**
 	 * Populate placetype table with data
 	 * Unlike other methods, this contains the data to be poulated (as placetypes rarely change between versions, and the structured lookup is available only via the web service)
@@ -568,11 +569,13 @@ class geoimport extends geoengine {
 	 */
 	public function populatePlaceTypes() {
 		echo "Populating placetypes...";
+		/*
 		//check table is there
 		if (!$this->tableExists(self :: TABLEPLACETYPES)) {
 			echo "Table " . self :: TABLEPLACETYPES . " does not exist. See " . $this->logFile . " for debug information\n";
 			return false;
 		}
+		
 		//see if already populated
 		$SQL1 = "SELECT id AS res FROM " . self :: TABLEPLACETYPES;
 		$result1 = $this->query($SQL1);
@@ -589,6 +592,7 @@ class geoimport extends geoengine {
 				return false;
 			}
 		}
+		*/
 		echo " complete\n";
 		return true;
 	}
@@ -714,13 +718,13 @@ class geoimport extends geoengine {
 	}
 
 	/**
-	 * Populates Preferred Placenames from Places
+	 * Populates Preferred Placenames from Places (country updated later)
 	 * @return Bool
 	 */
 	protected function populatePreferredNames() {
-		$SQL = "INSERT INTO " . self :: TABLEPLACENAMES . "(woeid,pref,name,nametype)
-						SELECT woeid, 1, name, NULL
-						FROM " . self :: TABLEPLACES;
+		$SQL = "INSERT INTO " . self :: TABLEPLACENAMES . "(woeid,pref,name,nametype,lang)
+						SELECT woeid, 1, name, NULL, lang
+						FROM " . self :: RAWPLACES;
 		if ($this->query($SQL)) {
 			return true;
 		} else {
@@ -729,18 +733,55 @@ class geoimport extends geoengine {
 	}
 
 	/**
-	 * Populates non-preferred Placenames from aliases
+	 * Populates non-preferred Placenames from aliases (country updated later)
 	 * @return Bool
 	 */
 	protected function populateNonPreferredNames() {
+		//add new column to raw aliases
+		$this->addPreftoRaw();
+		
+		//update raw pref
+		$SQL = "UPDATE ". self :: RAWALIASES ." SET pref=1 WHERE nametype=\"P\" OR nametype=\"Q\"";
+		$result = $this->query($SQL);
+		
+		//insert base data
 		$SQL = "INSERT INTO " . self :: TABLEPLACENAMES . "(woeid,pref,name,nametype,lang)
-					SELECT " . self :: RAWALIASES . ".woeid, 0, " . self :: RAWALIASES . ".name, " . self :: RAWALIASES . ".nametype," . self :: RAWALIASES . ".lang
+					SELECT " . self :: RAWALIASES . ".woeid, pref, " . self :: RAWALIASES . ".name, " . self :: RAWALIASES . ".nametype," . self :: RAWALIASES . ".lang
 					FROM " . self :: RAWALIASES;
-		if ($this->query($SQL)) {
-			return true;
-		} else {
-			return false;
+		$result = $this->query($SQL);
+		
+		/*
+		//now update preference
+		$SQL = "UPDATE ". self :: TABLEPLACENAMES." SET pref=1 WHERE woeid IN (SELECT woeid FROM ".self :: RAWALIASES." WHERE nametype IN (\"P\",\"Q\"))";
+		$result = $this->query($SQL);
+		*/
+		/*
+		 
+		 //$SQL = "SELECT woeid, name, nametype, lang FROM ". self::RAWALIASES;
+		  
+		$this->disableKeys(self :: TABLEPLACENAMES);
+		while ($row = $result->fetch_array(MYSQLI_ASSOC)) {
+			//determine whether preferred name or not
+			if ($row['nametype'] == "P" || $row['nametype'] == "Q"){
+				$pref = 1;
+			} else {
+				$pref = 0;
+			}
+			//insert
+			$SQL1 = "INSERT INTO " . self :: TABLEPLACENAMES . "(woeid,pref,name,nametype,lang)";
+			$SQL1 .= " VALUES (".$row['woeid'].",".$pref.",\"".$row['name']."\",\"".$row['nametype']."\",\"".$row['lang']."\")";
+			$this->query($SQL1);
 		}
+		$this->enableKeys(self :: TABLEPLACENAMES);
+		*/
+		return true;
+	}
+
+
+	protected function addPreftoRaw(){
+		$SQL = "ALTER TABLE ".self::RAWALIASES." ADD COLUMN `pref` TINYINT UNSIGNED NOT NULL DEFAULT 0 AFTER `name`";
+		$result = $this->query($SQL);
+		return true;
 	}
 
 	/**
