@@ -154,7 +154,6 @@ class geoimport extends geoengine {
 		return $nodes;
 	}
 
-
 	protected function countDescendants(){
 		$SQL = "SELECT COUNT(woeid) AS res FROM ".self::TABLEDESCENDANTS;
 		$result = $this->query($SQL);
@@ -480,6 +479,25 @@ class geoimport extends geoengine {
 		return $this->dbName;
 	}
 
+
+	public function testConnection(){
+		$cfg = $this->getConfig();
+		//create db
+		if (!$db = new mysqli($cfg['host'], $cfg['username'], $cfg['password'])) { //connect without database name
+			echo "Could not connect to database\n";
+			exit;
+		}
+		$db->set_charset("utf8"); //set client to utf8 
+		$SQL = "SHOW DATABASES";
+		$result = $db->query($SQL);
+		if ($result->num_rows > 0) {
+			return true;
+		} else {
+			return false;
+		}
+			
+	}
+
 	/**Create database and tables from external script
 	 * DB name comes from config file
 	 * Does not employ default db connection
@@ -500,7 +518,7 @@ class geoimport extends geoengine {
 		$SQL = "CREATE DATABASE IF NOT EXISTS " . $this->getDBName();
 		$result = $db->query($SQL);
 		if (!$result) {
-			echo "Error creating database " . $this->getDBName() . ": " . $db->error. " Database already exists?";
+			echo "Error creating database " . $this->getDBName() . ": " . $db->error. " Database already exists?\n";
 			exit;
 		} else {
 			echo "Empty Database " . $this->getDBName() . " created\n";
@@ -584,6 +602,8 @@ class geoimport extends geoengine {
 		$SQL = "DESC " . $tableName;
 		$result = $this->query($SQL);
 		if ($this->getDB()->errno == 1146) {
+			/*
+			$logMsg = "Table ".$tableName." does not exist\n";
 			$SQL2 = "SHOW TABLES";
 			$result2 = $this->query($SQL2);
 			$logMsg = "Found the following tables:\n";
@@ -591,6 +611,7 @@ class geoimport extends geoengine {
 				$logMsg .= "\t" . $row2[0] . "\n";
 			}
 			$this->logMsg($logMsg);
+			*/
 			return false;
 		} else {
 			return true;
