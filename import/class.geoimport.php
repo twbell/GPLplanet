@@ -735,14 +735,18 @@ class geoimport extends geoengine {
 	 * @return Bool
 	 */
 	protected function populatePreferredNames() {
+		//update contents
 		$SQL = "INSERT INTO " . self :: TABLEPLACENAMES . "(woeid,pref,name,nametype,lang)
 						SELECT woeid, 1, name, NULL, lang
 						FROM " . self :: RAWPLACES;
-		if ($this->query($SQL)) {
-			return true;
-		} else {
-			return false;
-		}
+		$this->query($SQL);
+		//set placename type (ENG)
+		$SQl = "UPDATE ".self :: TABLEPLACENAMES." SET nametype=\"P\" WHERE lang = \"ENG\" AND nametype IS NULL";
+		$this->query($SQL);
+		//set placename type (other)
+		$SQl = "UPDATE ".self :: TABLEPLACENAMES." SET nametype=\"Q\" WHERE lang != \"ENG\" AND nametype IS NULL";
+		$this->query($SQL);	
+		return true;	
 	}
 
 	/**
@@ -751,49 +755,23 @@ class geoimport extends geoengine {
 	 */
 	protected function populateNonPreferredNames() {
 		//add new column to raw aliases
-		$this->addPreftoRaw();
+		$SQL = "ALTER TABLE ".self::RAWALIASES." ADD COLUMN `pref` TINYINT UNSIGNED NOT NULL DEFAULT 0 AFTER `name`";
+		$result = $this->query($SQL);
 		
 		//update raw pref
 		$SQL = "UPDATE ". self :: RAWALIASES ." SET pref=1 WHERE nametype=\"P\" OR nametype=\"Q\"";
 		$result = $this->query($SQL);
 		
-		//insert base data
+		//update placenames with preferred/no-preferred
 		$SQL = "INSERT INTO " . self :: TABLEPLACENAMES . "(woeid,pref,name,nametype,lang)
 					SELECT " . self :: RAWALIASES . ".woeid, pref, " . self :: RAWALIASES . ".name, " . self :: RAWALIASES . ".nametype," . self :: RAWALIASES . ".lang
 					FROM " . self :: RAWALIASES;
 		$result = $this->query($SQL);
 		
-		/*
-		//now update preference
-		$SQL = "UPDATE ". self :: TABLEPLACENAMES." SET pref=1 WHERE woeid IN (SELECT woeid FROM ".self :: RAWALIASES." WHERE nametype IN (\"P\",\"Q\"))";
+		//remove raw pref column created above
+		$SQL = "ALTER TABLE ".self::RAWALIASES." DROP COLUMN `pref`";
 		$result = $this->query($SQL);
-		*/
-		/*
-		 
-		 //$SQL = "SELECT woeid, name, nametype, lang FROM ". self::RAWALIASES;
-		  
-		$this->disableKeys(self :: TABLEPLACENAMES);
-		while ($row = $result->fetch_array(MYSQLI_ASSOC)) {
-			//determine whether preferred name or not
-			if ($row['nametype'] == "P" || $row['nametype'] == "Q"){
-				$pref = 1;
-			} else {
-				$pref = 0;
-			}
-			//insert
-			$SQL1 = "INSERT INTO " . self :: TABLEPLACENAMES . "(woeid,pref,name,nametype,lang)";
-			$SQL1 .= " VALUES (".$row['woeid'].",".$pref.",\"".$row['name']."\",\"".$row['nametype']."\",\"".$row['lang']."\")";
-			$this->query($SQL1);
-		}
-		$this->enableKeys(self :: TABLEPLACENAMES);
-		*/
-		return true;
-	}
-
-
-	protected function addPreftoRaw(){
-		$SQL = "ALTER TABLE ".self::RAWALIASES." ADD COLUMN `pref` TINYINT UNSIGNED NOT NULL DEFAULT 0 AFTER `name`";
-		$result = $this->query($SQL);
+		
 		return true;
 	}
 
