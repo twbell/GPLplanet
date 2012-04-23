@@ -86,10 +86,15 @@ if (in_array($cfg['database'],$importEngine->listDatbases())){
 } else {
 	//create database
 	echo "Creating Database ".$cfg['database']."\n";
-	echo "Creating Data Structure\n";
+	echo "Creating Data Structure:\n";
 	if (!$importEngine->createDatabase()){
 		echo "Creating database falied\n";
 		exit;
+	}
+	//show tables
+	$tables = $importEngine->showTables();
+	foreach ($tables as $table){
+		echo "\t".$table."\n";
 	}
 }
 //create table to track import progress (if not exist)
@@ -97,12 +102,11 @@ if (!$importEngine->createTrackerTable($importProgress)){exit;}
 //get last stage of import completed
 $lastStage = $importEngine->getMaxTracker($importProgress);
 //cleaning old files
-echo "Removing old temp files, if any...\n";
+echo "Removing old temp files...\n";
 $importEngine->cleanTempFilesDesc();
 //import files
 echo "Importing Yahoo Geoplanet Data\n";
-
-//Switch statement ensures script picks up where it left off and does not attempt re-inserts, etc.
+//Switch statement more-or-less ensures script picks up where it left off and does not attempt re-inserts, etc.
 switch ($lastStage) {
 	//populate placetypes 1
     case 0:
@@ -195,7 +199,4 @@ switch ($lastStage) {
 		$importEngine->dropTrackerTable($importProgress);
 		echo "Import complete\n";
 }
-
-
-exit;
 
