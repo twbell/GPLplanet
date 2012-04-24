@@ -30,7 +30,7 @@ class geoimport extends geoengine {
 		echo "Populating ancestors...\n";
 		$SQL1 = "SELECT woeid FROM " . self :: TABLEPLACES . " WHERE woeid NOT IN (SELECT woeid FROM " . self :: TABLEANCESTORS . ") AND woeid != 1"; //earth is an orphan
 		$result1 = $this->query($SQL1, true);
-		echo "\tfound " . $result1->num_rows . " unprocessed ancestors; processing...\n";
+		echo "\t-found " . $result1->num_rows . " unprocessed ancestors; processing...\n";
 		$i = 0;
 		while ($row1 = $result1->fetch_array(MYSQLI_ASSOC)) {
 			$this->show_status($i, $result1->num_rows); //status bar
@@ -60,7 +60,7 @@ class geoimport extends geoengine {
 			unset ($aParents);
 			$i++;
 		}
-		echo "\tcomplete\n";
+		echo "\t-complete\n";
 		return true;
 	}
 
@@ -521,9 +521,7 @@ class geoimport extends geoengine {
 		if (!$result) {
 			echo "Error creating database " . $this->getDBName() . ": " . $db->error." \n";
 			exit;
-		} else {
-			echo "Empty Database " . $this->getDBName() . " created\n";
-		}
+		} 
 		if (!file_exists("geo.sql")) {
 			echo "Cannot find geo.sql in" . dirname(__FILE__);
 			exit;
@@ -540,7 +538,7 @@ class geoimport extends geoengine {
 			echo "Error creating tables for database " . $this->getDBName() . ": " . $db->error;
 			exit;
 		} else {
-			echo "Tables created in database `" . $this->getDBName() . "`\n";
+			//echo "Tables created in database `" . $this->getDBName() . "`\n";
 			unset ($db); //avoids 'commands out of sync' error
 		}
 		return true;
@@ -551,7 +549,7 @@ class geoimport extends geoengine {
 	 */
 	 public function showTables(){
 		$SQL = "SHOW TABLES";
-		$result = $db->query($SQL);	
+		$result = $this->query($SQL);	
 		while ($row = $result->fetch_array()) { 	
 			$tables[] = $row[0];
 		}

@@ -25,8 +25,8 @@
  */
 
 //runtime error reporting level
-//error_reporting(E_ERROR); 		
-error_reporting(E_ALL); 	
+error_reporting(E_ERROR); 		
+//error_reporting(E_ALL); 	
 
 //Get file locations from config
 $files = parse_ini_file('files.ini');
@@ -85,18 +85,20 @@ if (in_array($cfg['database'],$importEngine->listDatbases())){
 	echo "Database ".$cfg['database']." exists\n";
 } else {
 	//create database
-	echo "Creating Database ".$cfg['database']."\n";
-	echo "Creating Data Structure:\n";
+	echo "Creating Data Structure for database '".$cfg['database']."'. Tables:\n";
 	if (!$importEngine->createDatabase()){
 		echo "Creating database falied\n";
 		exit;
 	}
+	//pause (workaround for multi-query returning prematurely)
+	sleep(5);
 	//show tables
 	$tables = $importEngine->showTables();
 	foreach ($tables as $table){
-		echo "\t".$table."\n";
+		echo "\t-".$table."\n";
 	}
 }
+
 //create table to track import progress (if not exist)
 if (!$importEngine->createTrackerTable($importProgress)){exit;}
 //get last stage of import completed
