@@ -160,7 +160,7 @@ Not tested with version 4 of either one.
 /**
  * @package gplplanet
  * @author Tyler Bell tylerwbell[at]gmail[dot]com
- * @copyright (C) 2009-2011 - Tyler Bell
+ * @copyright (C) 2009-2012 - Tyler Bell
  * @license GNU General Public License
  */
 ```
