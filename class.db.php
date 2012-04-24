@@ -82,13 +82,34 @@ class db {
 	* @return mysql(i) result object
 	*/
 	public function multiQuery($SQL) {
+		if ($this->db->multi_query($SQL)) { 
+	    $i = 0; 
+		    do { 
+		        $i++; 
+		    } while ($this->db->next_result()); 
+		} 
+		if ($this->db->errno) { 
+		    $errMsg = $this->db->error . " (" . $SQL . ")";
+			throw new Exception(__METHOD__." ".$errMsg);
+		    return false;
+		} else {
+			return true;
+		}
+		
+		/*
 		$result = $this->db->multi_query($SQL);
 		if ($this->db->error) {
 			$errMsg = $this->db->error . " (" . $SQL . ")";
 			throw new Exception(__METHOD__." ".$errMsg);
 			return false;
 		}
-		return $result;
+		//iterate results to ensure that all queries are processed
+		if ($result = $mysqli->use_result()) {
+			
+		} else {
+			return false;
+		}
+		*/
 	}	
 } 
  
