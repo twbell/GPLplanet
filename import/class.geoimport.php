@@ -739,10 +739,10 @@ class geoimport extends geoengine {
 						FROM " . self :: RAWPLACES;
 		$this->query($SQL);
 		//set placename type (ENG)
-		$SQl = "UPDATE ".self :: TABLEPLACENAMES." SET nametype=\"P\" WHERE lang = \"ENG\" AND nametype IS NULL";
+		$SQL = "UPDATE ".self :: TABLEPLACENAMES." SET nametype=\"P\" WHERE lang = \"ENG\" AND nametype IS NULL";
 		$this->query($SQL);
 		//set placename type (other)
-		$SQl = "UPDATE ".self :: TABLEPLACENAMES." SET nametype=\"Q\" WHERE lang != \"ENG\" AND nametype IS NULL";
+		$SQL = "UPDATE ".self :: TABLEPLACENAMES." SET nametype=\"Q\" WHERE lang != \"ENG\" AND nametype IS NULL";
 		$this->query($SQL);	
 		return true;	
 	}
