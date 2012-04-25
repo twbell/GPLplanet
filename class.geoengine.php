@@ -454,7 +454,7 @@ class geoengine {
 		$SQL = "SELECT name FROM " . self :: TABLEPLACES . " WHERE woeid = ".$woeid;
 		$result = $this->query($SQL);
 		$row = $result->fetch_array(MYSQLI_ASSOC);
-		return $row['country'];
+		return $row['name'];
 	 }
 
 	/**
