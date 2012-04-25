@@ -117,7 +117,7 @@ class geo {
 	}
 
 	/** Get coordinates of centroid
-	* @return array
+	* @return array 'lon' & 'lat'
 	*/
 	public function getCentroid() {
 		if (!is_null($this->centroid['lon'])) {
@@ -130,6 +130,14 @@ class geo {
 			$this->updateInstanceCoords($geo); //update class properties with new coords
 		}
 		return $this->centroid;
+	}
+
+	/**
+	 * Alias for getCentroid()
+	* @return array 'lon' & 'lat'
+	 */
+	public function getCoords(){
+		return $this->getCentroid();
 	}
 
 	/**
