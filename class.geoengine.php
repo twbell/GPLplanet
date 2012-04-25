@@ -434,6 +434,18 @@ class geoengine {
 	}		
 
 	/**
+	 * Gets country of WOEID
+	 * @param int woeid WOEID
+	 * @return string two-letter country code
+	 */
+	 public function getCountry($woeid){
+		$SQL = "SELECT country FROM " . self :: TABLEPLACES . " WHERE woeid = ".$woeid;
+		$result = $this->query($SQL);
+		$row = $result->fetch_array(MYSQLI_ASSOC);
+		return $row['country'];
+	 }
+
+	/**
 	 * Converts array of WOEIDs to array of geo objects
 	 * @param array $aWoeids array of woeids
 	 * @return array geo objects
