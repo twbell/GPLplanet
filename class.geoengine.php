@@ -202,7 +202,7 @@ class geoengine {
 				'pref' => (bool) $row['pref'],
 				'nametype' => (int) $row['nametype']
 			);
-			$res[$row['name']] = $temp;
+			$res[] = $temp;
 		}
 		return $res;
 	}
