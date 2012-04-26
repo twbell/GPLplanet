@@ -192,7 +192,7 @@ class geoengine {
 	 * @return array
 	 */
 	public function getAliases($woeid){
-		$SQL = "SELECT name, nametype, pref, lang FROM " . self::TABLEPLACENAMES . " WHERE woeid=" . $woeid." AND pref != 1";
+		$SQL = "SELECT name, nametype, pref, lang FROM " . self::TABLEPLACENAMES . " WHERE woeid=" . $woeid;
 		$result = $this->query($SQL);
 		$res = array();
 		while ($row = $result->fetch_array(MYSQLI_ASSOC)){
@@ -206,6 +206,8 @@ class geoengine {
 		}
 		return $res;
 	}
+
+
 
 	/** Gets Placetype string (name) from placetype code
 	 * @param int placeTypeCode
