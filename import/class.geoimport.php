@@ -34,12 +34,13 @@ class geoimport extends geoengine {
 		$i = 0;
 		while ($row1 = $result1->fetch_array(MYSQLI_ASSOC)) {
 			$this->show_status($i, $result1->num_rows); //status bar
-			$temp = $row1['woeid'];
+			$temp = $row1['woeid']; //entity we are getting parents of
 			$aParents = array (); //initialize
 			while ($p = $this->getParent($temp)) { //iterate through parents
 				$ancestors = $this->getAncestors($p); //ancestors for this parent already calculated? Return.
 				if (!empty ($ancestors)) {
 					$aParents = array_merge($aParents, $ancestors);
+					$aParents[] = $p; //add to array
 					$aParents = array_unique($aParents);
 					break;
 				} else {
