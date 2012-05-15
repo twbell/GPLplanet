@@ -45,7 +45,7 @@ class geoimport extends geoengine {
 					break;
 				} else {
 					if (in_array($p, $aParents)) { //check for recursiveness, just in case
-						$this->logMsg(__METHOD__ . " Recursive Error " . $p . " is ancestor of itself\n");
+						throw new Exception(" Recursive Error " . $p . " is ancestor of itself");
 						exit;
 					}
 					$aParents[] = $p; //add to array
