@@ -660,6 +660,14 @@ class geoengine {
 	} 	
 
 	/**
+	 * Multi query database (wrapper)
+	 * @return resultset
+	 */
+	public function multiQuery($SQL){
+		return $this->getDB()->multiQuery($SQL);
+	} 	
+
+	/**
 	 * Returns (mysqli) database object
 	 * @return resultset
 	 */
