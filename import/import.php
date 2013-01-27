@@ -82,7 +82,7 @@ echo "\nxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n";
 echo "Import Files Verified\n";
 //check db exists
 if (in_array($cfg['database'],$importEngine->listDatbases())){
-	echo "Database ".$cfg['database']." exists\n";
+	echo "Database ".$cfg['database']." already exists. No modifications\n";
 } else {
 	//create database
 	echo "Creating Data Structure for database '".$cfg['database']."'. Tables:\n";
