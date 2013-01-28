@@ -3,7 +3,7 @@
 ##INTRODUCTION
 GPLplanet: an open source PHP library to assist in employing local instances of Yahoo 
 GeoPlanet(tm) in production. 
- 
+
 "Yahoo! GeoPlanet is a resource for managing all geo-permanent named places 
 on Earth. It provides the geographic developer community with the vocabulary 
 and grammar to describe the world's geography in an unequivocal, permanent, 
@@ -34,7 +34,9 @@ Web-service-only wrapper, see Tyler Hall's http://github.com/tylerhall/php-geopl
 using Chris Heilmann's 'GeoPlanet Explorer' website for an easy, ad-hoc woeid and placename lookup: 
 http://isithackday.com/geoplanet-explorer/
 
-Lastly: a reminder that the geoplanet data dump does not contain coordinates, which must be obtained from the GeoPlanet web service directly.  However, gplplanet wraps the GeoPlanet web service transparently.
+The Geoplanet data dump (http://developer.yahoo.com/geo/geoplanet/data/) was recently taken offline by Yahoo.  The most recent version of the file remains, and always will be, available via the Internet Archive (http://archive.org/details/geoplanet_data_7.10.0.zip).  This repo includes an SQL version of Geoplanet 7.10.0 optimised for this codebase.
+
+Lastly: a reminder that the geoplanet data dump does not contain coordinates, which must be obtained from the GeoPlanet web service directly, or another third party.  
   
 ##GETTING STARTED
 ### Create and Populate Database
