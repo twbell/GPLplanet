@@ -39,7 +39,7 @@ CREATE TABLE IF NOT EXISTS `geo_consistof` (
   `woeid` int(10) unsigned NOT NULL,
   `consistof` mediumtext COLLATE utf8_unicode_ci NOT NULL,
   PRIMARY KEY (`woeid`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci COMMENT='Conssists of lookup';
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci COMMENT='Consists of lookup';
 
 CREATE TABLE IF NOT EXISTS `geo_descendants` (
   `woeid` int(10) unsigned NOT NULL,
