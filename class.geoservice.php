@@ -11,6 +11,7 @@
  */
 
 class geoservice {
+	const CONFIGFILE = "config.ini";
 
 	public $yqlEndPoint = 'http://query.yahooapis.com/v1/public/yql'; //public query endpoint													
 	private static $_instance; //singleton management
@@ -24,8 +25,32 @@ class geoservice {
  	public $webServiceWait = 0.5;  //webservice wait between calls in seconds (0 = no wait)
  	protected $checkServiceStatus = true; //checks status of service if no results received (prevents hammering)
 
+	// oAuth support
+	public $oAuthMode = false;
+	private $cc_key;
+	private $cc_secret;
+
 	//table definitions
 	const TABLEGEOCODECACHE = "cache_geocode";  
+
+	private function __construct() {
+		//get config
+		$thisDir = dirname(__FILE__);
+		$configFile = $thisDir."/".self :: CONFIGFILE;		//config file assumed to be in same directory as this file
+		if (is_readable($configFile)) {
+			$cfg = parse_ini_file($configFile);
+
+			//maybe enable oAuth Mode
+			if ($cfg['cc_key'] && $cfg['cc_secret']) {
+				$this->oAuthMode = true;
+				$this->cc_key = $cfg['cc_key'];
+				$this->cc_secret = $cfg['cc_secret'];
+				$this->yqlEndPoint = 'http://query.yahooapis.com/v1/yql/yql';
+				$this->webServiceWait = '0.2'; //20K requests/hour == 5.5 requests/second ==  0.18 seconds/request
+			}
+		}
+	}
+
 
 	//============================= Methods =================================
 	
@@ -376,6 +401,13 @@ class geoservice {
 		$ch = curl_init();
 
 		$headers = array();
+		if ($this->oAuthMode) {
+			$consumer = new OAuthConsumer($this->cc_key, $this->cc_secret);
+			$request = OAuthRequest::from_consumer_and_token($consumer, NULL,"GET", $this->yqlEndPoint, $aVars);
+			$request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $consumer, NULL);
+			$headers = array($request->to_header());
+		}
+
 		$url = $this->yqlEndPoint . "?" . OAuthUtil::build_http_query($aVars);
 
 		curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
