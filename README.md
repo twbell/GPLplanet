@@ -152,7 +152,6 @@ Not tested with version 4 of either one.
 
 ##TODO
 * BelongTo service integration
-* YQL oauth implmentation for higher query throughput
 * Name search JS code examples for as-you-type lookup
 * Experiment with SimpleDB (currently MySQL)
 * Reconsider how relationships (descendants etc) are cached.  Now just larger arrays in single field -- not elegant.

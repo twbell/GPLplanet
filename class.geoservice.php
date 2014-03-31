@@ -11,6 +11,7 @@
  */
 
 class geoservice {
+	const CONFIGFILE = "config.ini";
 
 	public $yqlEndPoint = 'http://query.yahooapis.com/v1/public/yql'; //public query endpoint													
 	private static $_instance; //singleton management
@@ -24,8 +25,32 @@ class geoservice {
  	public $webServiceWait = 0.5;  //webservice wait between calls in seconds (0 = no wait)
  	protected $checkServiceStatus = true; //checks status of service if no results received (prevents hammering)
 
+	// oAuth support
+	public $oAuthMode = false;
+	private $cc_key;
+	private $cc_secret;
+
 	//table definitions
 	const TABLEGEOCODECACHE = "cache_geocode";  
+
+	private function __construct() {
+		//get config
+		$thisDir = dirname(__FILE__);
+		$configFile = $thisDir."/".self :: CONFIGFILE;		//config file assumed to be in same directory as this file
+		if (is_readable($configFile)) {
+			$cfg = parse_ini_file($configFile);
+
+			//maybe enable oAuth Mode
+			if ($cfg['cc_key'] && $cfg['cc_secret']) {
+				$this->oAuthMode = true;
+				$this->cc_key = $cfg['cc_key'];
+				$this->cc_secret = $cfg['cc_secret'];
+				$this->yqlEndPoint = 'http://query.yahooapis.com/v1/yql/yql';
+				$this->webServiceWait = '0.2'; //20K requests/hour == 5.5 requests/second ==  0.18 seconds/request
+			}
+		}
+	}
+
 
 	//============================= Methods =================================
 	
@@ -353,6 +378,8 @@ class geoservice {
 	 * @return object json object
 	 */
 	public function query($qString, $aUserVars = "") {
+		require_once ('OAuth.php');
+
 		if (!$qString) {
 			$this->logMsg(__METHOD__ . " No query string passed to YQL");
 			return false;
@@ -360,7 +387,8 @@ class geoservice {
 
 		//build variable array
 		$aVars = array (
-			'format' => 'json'
+			'format' => 'json',
+			'q' => $qString,
 		);
 
 		//add variables from parameter
@@ -368,19 +396,26 @@ class geoservice {
 			$aVars = array_merge($aVars, $aUserVars);
 		}
 
-		//combine keys and values
-		foreach ($aVars as $key => $value) {
-			if ($value) {
-				$aVarComb[] = $key . "=" . urlencode($value);
-			}
+		$this->webserviceWait(); // pause as required before calling webservice again
+
+		$ch = curl_init();
+
+		$headers = array();
+		if ($this->oAuthMode) {
+			$consumer = new OAuthConsumer($this->cc_key, $this->cc_secret);
+			$request = OAuthRequest::from_consumer_and_token($consumer, NULL,"GET", $this->yqlEndPoint, $aVars);
+			$request->sign_request(new OAuthSignatureMethod_HMAC_SHA1(), $consumer, NULL);
+			$headers = array($request->to_header());
 		}
-		unset ($aVars);
-		//create data string
-		$sData = implode("&", $aVarComb);
-		unset ($aVarComb);
-		$endPoint = $this->yqlEndPoint . "?q=" . urlencode($qString) . "&" . $sData;
-		$this->webserviceWait();		//pause as required before calling webservice again
-		@ $result = file_get_contents($endPoint);
+
+		$url = $this->yqlEndPoint . "?" . OAuthUtil::build_http_query($aVars);
+
+		curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+		curl_setopt($ch, CURLOPT_URL, $url);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
+
+		$result = curl_exec($ch);
+
 		if (!$result) {
 			$err = __METHOD__ . " YQL Error on " . $qString . ": " . $http_response_header[0];
 			throw new Exception($err);
@@ -389,10 +424,11 @@ class geoservice {
 		$result = json_decode($result);
 		
 		//checks results for no love, calls diagnostics, and bails on error 999
-		if ($this->checkServiceStatus){
+		if ($this->checkServiceStatus && !(is_array($aUserVars) && array_key_exists('diagnostics', $aUserVars))) {
 			if ($result->query->count === 0){
 				//run same query with diagnostics
-				$check = json_decode(file_get_contents($endPoint."&diagnostics=true"),true); //as array; obj vars w/ dashes fail
+				$aUserVars['diagnostics'] = true;
+				$check = $this->query($qString, $aUserVars);
 				if ($check['query']['diagnostics']['url']['http-status-code'] == 999){
 					$err = "YQL error 999: limit appears to have been reached";
 					$this->logMsg($err);
