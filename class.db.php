@@ -31,7 +31,15 @@ class db {
 		}
 		//connect
 		try {
-	 		$this->db = new mysqli($cfg['host'], $cfg['username'], $cfg['password'],$cfg['database']);
+            if ($cfg['socket']) {
+                $this->db = new mysqli($cfg['host'], $cfg['username'], $cfg['password'],$cfg['database'], null, $cfg['socket']);
+            }
+            elseif ($cfg['port']) {
+                $this->db = new mysqli($cfg['host'], $cfg['username'], $cfg['password'],$cfg['database'], $cfg['port'], null);
+            }
+            else {
+                $this->db = new mysqli($cfg['host'], $cfg['username'], $cfg['password'],$cfg['database'], null, null);
+            }
 		} catch (Exception $e) {
 			$errMsg = "MySQL Connect to " . $cfg['host'] . "/" . $cfg['database'] . " failed: %s\n". mysqli_connect_error();
 			throw new Exception(__METHOD__." ".$e->getMessage().": ".$errMsg);
