@@ -1,6 +1,8 @@
-#GPLPlanet
+# GPLPlanet
 
-##INTRODUCTION
+Notice: See WOEPlanet (https://woeplanet.org/about/) for something more up-to-date and better.
+
+## INTRODUCTION
 GPLplanet: an open source PHP library to assist in employing local instances of Yahoo 
 GeoPlanet(tm) in production. 
 
@@ -38,7 +40,7 @@ The Geoplanet data dump (http://developer.yahoo.com/geo/geoplanet/data/) was rec
 
 Lastly: a reminder that the geoplanet data dump does not contain coordinates, which must be obtained from the GeoPlanet web service directly, or another third party.  
   
-##GETTING STARTED
+## GETTING STARTED
 ### Create and Populate Database
 ```bash
 gunzip [path/to/gplplanet]/import/gplplanet.sql.zip
@@ -97,12 +99,12 @@ serves the same purpose as:
 
 and is equally efficient.
 
-##USE OF EXTERNAL WEB SERVICES
+## USE OF EXTERNAL WEB SERVICES
 Some methods call Yahoo and other web services via YQL.  The results of these calls are cached so (for example) if you 
 request the Bounding box of an entity, the webservice will not be called if request a second time.  The general idea is 
 to seamlessly incorporate the webservice calls only where required.
 
-##COMMAND LINE SCRIPTS
+## COMMAND LINE SCRIPTS
 Example command line scripts live in the scripts folder:
 
 ```bash
@@ -110,7 +112,7 @@ Example command line scripts live in the scripts folder:
 	php get.php 12345	//returns JSON hash representation of woeid 12345
 ```
 
-##DIR OVERVIEW
+## DIR OVERVIEW
 * import					*Scripts, class for importing the geoplanet tsv files*
     * import/class.import.php  *Methods for tsv data import*
     * import/import.php		*Procedural script for importing tsv data*
@@ -131,32 +133,32 @@ Example command line scripts live in the scripts folder:
 * class.db.php               	*Database object and methods*
 * config.ini                  *Configurations incl. database connection*
 
-##REQUIRED LIBS
+## REQUIRED LIBS
 * PHP 5 with MySQLi
 * MySQL
 
 Not tested with version 4 of either one.
 
-##IMPORTING GEOPLANET DATA
+## IMPORTING GEOPLANET DATA
 1. Add database vars to config.ini
 2. Download geoplanet data from http://developer.yahoo.com/geo/geoplanet/data/
 3. Assign tsv filenames to the variables in import.php
 4. Run import.php from the command line (e.g. "php import.php")
 
-###Import Notes:
+### Import Notes:
 * See more detailed notes in import.php
 * Import status will be echoed
 * Script takes several hours or even days, depending on processor
 * Needs disk and memory resources; see import.php for requirements
 * Largest array produced at runtime (after import) is just under 18MB (UK descendants)
 
-##TODO
+## TODO
 * BelongTo service integration
 * Name search JS code examples for as-you-type lookup
 * Experiment with SimpleDB (currently MySQL)
 * Reconsider how relationships (descendants etc) are cached.  Now just larger arrays in single field -- not elegant.
 
-##SOURCE
+## SOURCE
 ```php
 /**
  * @package gplplanet
